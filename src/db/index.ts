@@ -8,7 +8,7 @@ const connectDB = async ():Promise<void> => {
       `Mongodb connected !! DB Host ${connectionInstance.connection.host}`
     );
   } catch (error) {
-    console.log(`Mongodb Connection Errro` + error);
+    console.log(`Mongodb Connection Error` + error);
     process.exit(1);
   }
 };

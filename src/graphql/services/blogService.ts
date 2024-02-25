@@ -1,10 +1,8 @@
 import { AuthenticationError, UserInputError } from "apollo-server-express";
-import Blog, { IBlog } from "../../models/blog.model";
+import Blog from "../../models/blog.model";
 import { Context } from "../../types";
 import { checkAuth } from "../../middlewares/auth.middleware";
 import { CreateBlog, DeleteBlog, UpdateBlog } from "../../types/blogTypes";
-import mongoose from "mongoose";
-import Comment from "../../models/comment.model";
 
 const BlogQuery = {
   getAllBlogs: async () => {
@@ -95,15 +93,11 @@ const BlogMutation = {
     }
     const blog = await Blog.findByIdAndDelete(blogId._id);
 
-
-
     if (!blog) {
       throw new AuthenticationError("Blog not found");
     }
 
     // await Comment.findByIdAndDelete(blogId?._id)
-
-
 
     return "Blog Delete Successfully";
   },

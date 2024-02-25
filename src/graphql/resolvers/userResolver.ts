@@ -1,5 +1,5 @@
-import { Resolvers } from "../../types";
 import { UserMutation, UserQuery } from "../services/userService";
+import { Resolvers } from "../../types";
 
 const UserResolver: Resolvers = {
   Query: UserQuery,

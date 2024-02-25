@@ -1,5 +1,5 @@
-import { checkAuth } from "../../middlewares/auth.middleware";
 import { CreateComment, DeleteCommet } from "../../types/blogTypes";
+import { checkAuth } from "../../middlewares/auth.middleware";
 import { Context } from "../../types";
 import Comment, { IComment } from "../../models/comment.model";
 import { AuthenticationError } from "apollo-server-express";
@@ -19,25 +19,16 @@ const CommentMutation = {
   ) => {
     checkAuth(error);
     const { comment, blogId } = input;
-    const blog = await Blog.findById(blogId).populate({
-      path: "comments",
-      select: "comment user",
+
+    const blogComment: any = await Comment.findOne({
+      blog: blogId,
+      user: user?._id,
     });
 
-    if (!blog) {
-      throw new AuthenticationError("Blog not found");
-    }
-    const existingComment = blog.comments.find(
-      (item: any) => item.user.toString() == user?._id.toString()
-    );
+    if (blogComment) {
+      blogComment.comment = comment;
 
-    if (existingComment) {
-      blog.comments.forEach((b: any) => {
-        if (b.user.toString() === user?._id?.toString()) {
-          b.comment = comment;
-        }
-      });
-      await blog.save({ validateBeforeSave: false });
+      await blogComment.save({ validateBeforeSave: false });
       return "Comment created successfully";
     } else {
       try {
@@ -51,7 +42,7 @@ const CommentMutation = {
           blogId,
           {
             $push: {
-              comment: newComment._id,
+              comments: newComment._id,
             },
           },
           { new: true }
@@ -60,8 +51,6 @@ const CommentMutation = {
         if (!updatedBlog) {
           throw new AuthenticationError("Blog not found");
         }
-        await blog.save({ validateBeforeSave: false });
-
         return "Comment created successfully";
       } catch (err) {
         throw new AuthenticationError(err as string);

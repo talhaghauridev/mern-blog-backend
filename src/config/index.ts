@@ -12,4 +12,4 @@ const dotenvConfig: DotenvConfigOptions = {
   path: "./.env",
 };
 
-export { corsConfig,dotenvConfig };
+export { corsConfig, dotenvConfig };

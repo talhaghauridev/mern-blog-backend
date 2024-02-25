@@ -9,19 +9,23 @@ interface Todo {
 }
 
 type Resolvers = {
-  Query?: any ;
+  Query?: any;
   Mutation?: any;
-}
+};
 
 type Context = {
   user?: IUser | null;
   error: string | null;
 };
 
+type AccessTokenResponse = {
+  accessToken: string;
+  loggedUser: IUser;
+};
 
-type AccessTokenResponse ={
-    accessToken:string;
-    loggedUser:IUser
-}
+type ImageType = {
+  url: string;
+  public_Id: string;
+};
 
-export type { Todo, Resolvers, Context,AccessTokenResponse };
+export type { Todo, Resolvers, Context, AccessTokenResponse, ImageType };

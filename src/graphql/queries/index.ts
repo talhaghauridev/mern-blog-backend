@@ -1,4 +1,3 @@
-// src/schema.ts
 import blogQueries from "./blogQueries";
 import commentQueries from "./commentQueries";
 import userQueries from "./userQueries";

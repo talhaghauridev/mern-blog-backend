@@ -1,33 +1,24 @@
-import { IBlog } from "../models/blog.model"
-import { IComment } from "../models/comment.model"
+import { IBlog } from "../models/blog.model";
+import { IComment } from "../models/comment.model";
 
 type CreateBlog = {
-    input:IBlog
-}
+  input: IBlog;
+};
 
-type UpdateBlog  = CreateBlog & {
-    id:string
-}
+type UpdateBlog = CreateBlog & {
+  id: string;
+};
 
 type DeleteBlog = {
-    id:string
-}
+  id: string;
+};
 
+type CreateComment = IComment & {
+  blogId: string;
+  comment: string;
+};
 
-
-type CreateComment = IComment& {
-blogId:string;
-comment:string;
-}
-
-
-type DeleteCommet= {
-    commentId:string;
-}
-export type {
-    CreateBlog,
-    UpdateBlog,
-    DeleteBlog,
-    CreateComment,
-    DeleteCommet
-}
+type DeleteCommet = {
+  commentId: string;
+};
+export type { CreateBlog, UpdateBlog, DeleteBlog, CreateComment, DeleteCommet };

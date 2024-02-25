@@ -23,6 +23,13 @@ const init = async (): Promise<void> => {
   });
 };
 
+app.get("/", (req, res, next) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is running fine",
+  });
+});
+
 connectDB().then(() => {
   init();
 });

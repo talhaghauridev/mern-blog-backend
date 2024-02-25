@@ -1,7 +1,6 @@
 import { ExpressContextFunctionArgument } from "@apollo/server/dist/esm/express4";
-import User, { IUser } from "../models/user.model";
-import { hrtime } from "process";
-import { ApolloError, AuthenticationError } from "apollo-server-express";
+import User from "../models/user.model";
+import { ApolloError } from "apollo-server-express";
 import jwt from "jsonwebtoken";
 import { ACCESS_TOKEN_SECRET } from "../constants";
 import { Context } from "../types";
@@ -14,7 +13,7 @@ const verifyToken = async ({
   if (!authenication) {
     return { error: "Please Login to access these resources", user: null };
   }
-  const token = authenication.replace("Bearer", " ");
+  const token = authenication.replace("Bearer ", " ") || authenication;
 
   if (!token) {
     return { error: "Please Login to access these resources", user: null };

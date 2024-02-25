@@ -4,7 +4,7 @@ import { Schema, model, Document } from "mongoose";
 export interface IComment extends Document {
   user: Schema.Types.ObjectId;
   comment: string;
-  blog: Schema.Types.ObjectId; // Ensure that the blog field is of type ObjectId
+  blog: Schema.Types.ObjectId;
 }
 
 const commentSchema = new Schema<IComment>(
