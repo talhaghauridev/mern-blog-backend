@@ -37,6 +37,7 @@ const CommentMutation = {
           user: user?._id,
           blog: blogId,
         });
+        console.log("Hello");
 
         const updatedBlog = await Blog.findByIdAndUpdate(
           blogId,
