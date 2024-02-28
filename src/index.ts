@@ -1,20 +1,12 @@
-import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import app from "./app";
 import { verifyToken } from "./middlewares/auth.middleware";
-import typeDefs from "./graphql/queries/index";
-import resolvers from "./graphql/resolvers/index";
 import connectDB from "./db";
 import { PORT } from "./constants";
+import createApolloGraphgqlServer from "./graphql";
 
 const init = async (): Promise<void> => {
-  const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-    introspection: true,
-  });
-
-  await server.start();
+  const server = await createApolloGraphgqlServer();
 
   app.use("/graphql", expressMiddleware(server, { context: verifyToken }));
 

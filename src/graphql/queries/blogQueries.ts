@@ -3,6 +3,7 @@ import { gql } from "apollo-server-express";
 const blogQueries = gql`
   type Query {
     getAllBlogs: [Blog]!
+    getBlogDetials(id:ID!):Blog!
   }
 
   type Comment {
@@ -16,7 +17,7 @@ const blogQueries = gql`
     _id: ID!
     title: String!
     description: String!
-    iamge: String!
+    image: String!
     createdAt: String!
     comments: [Comment]!
     user: User!

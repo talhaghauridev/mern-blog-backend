@@ -2,7 +2,12 @@ import { AuthenticationError, UserInputError } from "apollo-server-express";
 import Blog from "../../models/blog.model";
 import { Context } from "../../types";
 import { checkAuth } from "../../middlewares/auth.middleware";
-import { CreateBlog, DeleteBlog, UpdateBlog } from "../../types/blogTypes";
+import {
+  CreateBlog,
+  DeleteBlog,
+  UpdateBlog,
+  BlogDetials,
+} from "../../types/blogTypes";
 
 const BlogQuery = {
   getAllBlogs: async () => {
@@ -23,6 +28,24 @@ const BlogQuery = {
 
     return blogs;
   },
+  getBlogDetials: async (_: any, { id }: BlogDetials) => {
+    const blog = await Blog.findById(id)
+      .populate({
+        path: "comments",
+        select: "comment user blog",
+        populate: {
+          path: "user",
+          model: "User",
+        },
+      })
+      .populate("user");
+
+    if (!blog) {
+      throw new AuthenticationError("Blog not found");
+    }
+    return blog;
+  },
+  
 };
 
 const BlogMutation = {
