@@ -2,6 +2,7 @@ import { AuthenticationError, UserInputError } from "apollo-server-express";
 import User, { IUser } from "../../models/user.model";
 import { AccessTokenResponse, Context } from "../../types";
 import { checkAuth } from "../../middlewares/auth.middleware";
+import { uploadCloudinary } from "../../utils/cloudinary";
 
 const generateAccessToken = async (
   userId: string
@@ -49,9 +50,9 @@ const UserMutation = {
   },
 
   signupUser: async (_: any, { userData }: { userData: IUser }) => {
-    const { name, email, password } = userData;
+    const { name, email, password, avatar } = userData;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !avatar) {
       throw new AuthenticationError("Please fill all field");
     }
 
@@ -60,7 +61,16 @@ const UserMutation = {
       throw new AuthenticationError("User is already exist in this email");
     }
 
+    const response = await uploadCloudinary(avatar as string, "users");
+
+    if (!response) {
+      throw new AuthenticationError("Cloudinay error ");
+    }
     const user = await User.create({
+      avatar:{
+        url:response.url,
+        public_id:response.public_id
+      },
       name,
       email,
       password,

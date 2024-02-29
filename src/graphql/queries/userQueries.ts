@@ -10,8 +10,14 @@ const userQueries = gql`
     _id: ID!
     name: String!
     email: String!
+    avatar: Avatar!
     createdAt: String!
     token: String
+  }
+
+  type Avatar {
+    url: String!
+    public_id: String!
   }
 
   type Mutation {
@@ -27,7 +33,8 @@ const userQueries = gql`
   input SignupInput {
     name: String!
     email: String!
-    password: String
+    password: String!
+    avatar: String!
   }
 `;
 

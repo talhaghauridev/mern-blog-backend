@@ -5,6 +5,7 @@ import connectDB from "./db";
 import { PORT } from "./constants";
 import createApolloGraphgqlServer from "./graphql";
 
+
 const init = async (): Promise<void> => {
   const server = await createApolloGraphgqlServer();
 

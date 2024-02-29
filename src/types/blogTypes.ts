@@ -1,5 +1,4 @@
 import { IBlog } from "../models/blog.model";
-import { IComment } from "../models/comment.model";
 
 type CreateBlog = {
   input: IBlog;
@@ -17,7 +16,7 @@ type DeleteBlog = {
   id: string;
 };
 
-type CreateComment = IComment & {
+type CreateComment = {
   blogId: string;
   comment: string;
 };

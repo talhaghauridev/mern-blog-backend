@@ -2,18 +2,30 @@ import { Document, model, Schema } from "mongoose";
 import { ACCESS_TOKEN_EXPIRY, ACCESS_TOKEN_SECRET } from "../constants";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { ImageType } from "../types";
 export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
+  avatar: ImageType | string;
   generateAccessToken: () => string;
-  isCorrectPassword: (password:string) => Promise<boolean>;
+  isCorrectPassword: (password: string) => Promise<boolean>;
 }
 
 const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    avatar: {
+      url: {
+        type: String,
+        required: true,
+      },
+      public_id: {
+        type: String,
+        required: true,
+      },
+    },
     password: { type: String, required: true },
   },
   { timestamps: true }

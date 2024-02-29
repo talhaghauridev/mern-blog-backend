@@ -1,5 +1,8 @@
 import { AuthenticationError } from "apollo-server-express";
 import { v2, UploadApiResponse } from "cloudinary";
+import { cloudinaryConfig } from "../config";
+
+v2.config(cloudinaryConfig);
 
 const uploadCloudinary = async (
   file: string,

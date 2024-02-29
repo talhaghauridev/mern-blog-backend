@@ -1,12 +1,4 @@
-import { AuthenticationError } from "apollo-server-express";
 import { IUser } from "../models/user.model";
-
-interface Todo {
-  id: string;
-  title: string;
-  description: string;
-  // Add other properties as needed
-}
 
 type Resolvers = {
   Query?: any;
@@ -25,7 +17,7 @@ type AccessTokenResponse = {
 
 type ImageType = {
   url: string;
-  public_Id: string;
+  public_id: string;
 };
 
-export type { Todo, Resolvers, Context, AccessTokenResponse, ImageType };
+export type { Resolvers, Context, AccessTokenResponse, ImageType };
