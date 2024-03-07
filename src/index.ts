@@ -25,3 +25,4 @@ const init = async () => {
 init().then(async () => {
   await connectDB();
 });
+console.log(ENV_MODE);

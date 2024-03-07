@@ -27,7 +27,6 @@ const verifyUser = async ({ token: authHeader }: Context): Promise<IUser> => {
     return ApolloError("Token is required", ErrorTypes.BAD_USER_INPUT);
   }
   const token = authHeader.replace("Bearer ", "");
-  console.log({ authHeader, token });
 
   let decoded;
   try {

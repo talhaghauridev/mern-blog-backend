@@ -16,11 +16,12 @@ import {
   SignUpGoogleInput,
   SignupInput,
 } from "./interfaces";
+import { rateLimitedResolver } from "@/utils/rate-limiter";
 
 const queries = {};
 
 const mutations = {
-  login: async (_: any, { input }: LoginInput) => {
+  login: rateLimitedResolver(async (_: any, { input }: LoginInput) => {
     const { email, password } = input;
 
     if (!email || !password) {
@@ -51,9 +52,9 @@ const mutations = {
       accessToken,
       refreshToken,
     };
-  },
+  }),
 
-  signup: async (_: any, { input }: SignupInput) => {
+  signup: rateLimitedResolver(async (_: any, { input }: SignupInput) => {
     const { fullName, email, password } = input;
     if (!fullName || !email || !password) {
       return ApolloError("Please fill all fields", ErrorTypes.VALIDATION_ERROR);
@@ -94,9 +95,9 @@ const mutations = {
       accessToken,
       refreshToken,
     };
-  },
+  }),
 
-  signUpGoogle: async (_: any, arg: SignUpGoogleInput) => {
+  signUpGoogle: rateLimitedResolver(async (_: any, arg: SignUpGoogleInput) => {
     const incomingAccessToken: string = arg.accessToken;
     if (!incomingAccessToken) {
       return ApolloError("Access Token is required", ErrorTypes.BAD_USER_INPUT);
@@ -169,41 +170,43 @@ const mutations = {
         ErrorTypes.BAD_REQUEST
       );
     }
-  },
+  }),
 
-  refreshAccessToken: async (_: any, arg: RefreshTokenInput) => {
-    const incomingRefreshToken = arg.refreshToken;
-    if (!incomingRefreshToken) {
-      return ApolloError(
-        "Refresh Token is required",
-        ErrorTypes.VALIDATION_ERROR
-      );
-    }
-    const decodedToken = jwt.verify(
-      incomingRefreshToken,
-      REFRESH_TOKEN_SECRET
-    ) as { id: string };
-    if (!decodedToken) {
-      return ApolloError("Invalid Refresh Token", ErrorTypes.UNAUTHENTICATED);
-    }
-    const user = await UserService.findById(decodedToken.id);
-    if (!user) {
-      return ApolloError("Invalid Refresh Token", ErrorTypes.UNAUTHENTICATED);
-    }
+  refreshAccessToken: rateLimitedResolver(
+    async (_: any, arg: RefreshTokenInput) => {
+      const incomingRefreshToken = arg.refreshToken;
+      if (!incomingRefreshToken) {
+        return ApolloError(
+          "Refresh Token is required",
+          ErrorTypes.VALIDATION_ERROR
+        );
+      }
+      const decodedToken = jwt.verify(
+        incomingRefreshToken,
+        REFRESH_TOKEN_SECRET
+      ) as { id: string };
+      if (!decodedToken) {
+        return ApolloError("Invalid Refresh Token", ErrorTypes.UNAUTHENTICATED);
+      }
+      const user = await UserService.findById(decodedToken.id);
+      if (!user) {
+        return ApolloError("Invalid Refresh Token", ErrorTypes.UNAUTHENTICATED);
+      }
 
-    if (incomingRefreshToken !== user.refreshToken) {
-      return ApolloError(
-        "Refresh token is Invalid",
-        ErrorTypes.UNAUTHENTICATED
-      );
-    }
+      if (incomingRefreshToken !== user.refreshToken) {
+        return ApolloError(
+          "Refresh token is Invalid",
+          ErrorTypes.UNAUTHENTICATED
+        );
+      }
 
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-      user._id as string
-    );
-    return { accessToken, refreshToken };
-  },
-  logout: async (_: any, __: unknown, ctx: Context) => {
+      const { accessToken, refreshToken } =
+        await generateAccessAndRefreshTokens(user._id as string);
+      return { accessToken, refreshToken };
+    }
+  ),
+
+  logout: rateLimitedResolver(async (_: any, __: unknown, ctx: Context) => {
     const user = await verifyUser(ctx);
     const updateUser = await User.findByIdAndUpdate(
       user._id,
@@ -219,42 +222,44 @@ const mutations = {
     }
 
     return "User logged out";
-  },
-  changePassword: async (
-    _: any,
-    { input }: ChangePasswordInput,
-    ctx: Context
-  ) => {
-    const user = await verifyUser(ctx);
-    const { oldPassword, newPassword } = input;
-    if (!oldPassword || !newPassword) {
-      return ApolloError("Please fill all fields", ErrorTypes.VALIDATION_ERROR);
-    }
-    if (!PASSWORD_REGEX.test(newPassword)) {
-      return ApolloError(
-        "Password should be 6 to 20 characters long with a numeric,1 lowercase and 1 uppercase letters",
-        ErrorTypes.BAD_USER_INPUT
-      );
-    }
+  }),
 
-    const isUser = await UserService.findById(user._id as string);
-    if (!isUser) {
-      return ApolloError("User not found", ErrorTypes.NOT_FOUND);
+  changePassword: rateLimitedResolver(
+    async (_: any, { input }: ChangePasswordInput, ctx: Context) => {
+      const user = await verifyUser(ctx);
+      const { oldPassword, newPassword } = input;
+      if (!oldPassword || !newPassword) {
+        return ApolloError(
+          "Please fill all fields",
+          ErrorTypes.VALIDATION_ERROR
+        );
+      }
+      if (!PASSWORD_REGEX.test(newPassword)) {
+        return ApolloError(
+          "Password should be 6 to 20 characters long with a numeric,1 lowercase and 1 uppercase letters",
+          ErrorTypes.BAD_USER_INPUT
+        );
+      }
+
+      const isUser = await UserService.findById(user._id as string);
+      if (!isUser) {
+        return ApolloError("User not found", ErrorTypes.NOT_FOUND);
+      }
+      const isPasswordMatched = await user.isPasswordCorrect(oldPassword);
+
+      if (!isPasswordMatched) {
+        return ApolloError(
+          "Old password is incorrect ",
+          ErrorTypes.BAD_USER_INPUT
+        );
+      }
+
+      isUser.profile_info.password = newPassword;
+
+      isUser.save({ validateBeforeSave: false });
+      return "Password changed successfully";
     }
-    const isPasswordMatched = await user.isPasswordCorrect(oldPassword);
-
-    if (!isPasswordMatched) {
-      return ApolloError(
-        "Old password is incorrect ",
-        ErrorTypes.BAD_USER_INPUT
-      );
-    }
-
-    isUser.profile_info.password = newPassword;
-
-    isUser.save({ validateBeforeSave: false });
-    return "Password changed successfully";
-  },
+  ),
 };
 
 export const resolvers = { queries, mutations };
