@@ -5,7 +5,6 @@ import connectDB from "./db";
 import { PORT } from "./constants";
 import createApolloGraphgqlServer from "./graphql";
 
-
 const init = async (): Promise<void> => {
   const server = await createApolloGraphgqlServer();
 
@@ -19,12 +18,13 @@ const init = async (): Promise<void> => {
 app.get("/", (req, res, next) => {
   res.status(200).json({
     success: true,
-    message: "Server is running fine",
+    message: "Server is running fine".repeat(300),
   });
 });
 
-connectDB().then(() => {
-  init();
-});
+// connectDB().then(() => {
+//   init();
+// });
+init();
 
 export default app;
