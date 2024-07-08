@@ -1,56 +1,166 @@
-import { Document, model, Schema } from "mongoose";
-import { ACCESS_TOKEN_EXPIRY, ACCESS_TOKEN_SECRET } from "../constants";
+import { model, Schema, Document, Model } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { ImageType } from "../types";
-export interface IUser extends Document {
-  name: string;
-  email: string;
-  password: string;
-  avatar: ImageType | string;
-  generateAccessToken: () => string;
-  isCorrectPassword: (password: string) => Promise<boolean>;
+import {
+  AvailableSocialLogins,
+  AvailableUserRoles,
+  UserLoginType,
+  UserRolesEnum,
+} from "../constants/constants";
+import {
+  ACCESS_TOKEN_EXPIRY,
+  ACCESS_TOKEN_SECRET,
+  REFRESH_TOKEN_EXPIRY,
+  REFRESH_TOKEN_SECRET,
+} from "../constants/env";
+import { UserType } from "../types";
+
+export interface IUser extends UserType, Document {
+  isPasswordCorrect(enteredPassword: string): Promise<boolean>;
+  generateAccessToken(): string;
+  generateRefreshToken(): string;
 }
 
 const userSchema = new Schema<IUser>(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    avatar: {
-      url: {
+    profile_info: {
+      fullName: {
         type: String,
         required: true,
+        lowercase: true,
+        minlength: [3, "FullName must be at least 3 characters"],
       },
-      public_id: {
+      email: {
         type: String,
         required: true,
+        trim: true,
+        unique: true,
+      },
+      username: {
+        type: String,
+        required: true,
+        unique: true,
+        minlength: [3, "Username must be at least 3 characters"],
+      },
+      bio: {
+        type: String,
+        maxlength: [200, "Bio should not be more than 200 characters"],
+        default: "",
+      },
+      password: {
+        type: String,
+        required: [true, "Password is required"],
+      },
+      profileImage: {
+        url: {
+          type: String,
+          default: "",
+        },
+        public_url: {
+          type: String,
+          default: "",
+        },
       },
     },
-    password: { type: String, required: true },
+    role: {
+      type: String,
+      enum: AvailableUserRoles,
+      default: UserRolesEnum.USER,
+      required: true,
+    },
+    social_links: {
+      youtube: {
+        type: String,
+        default: "",
+      },
+      instagram: {
+        type: String,
+        default: "",
+      },
+      facebook: {
+        type: String,
+        default: "",
+      },
+      twitter: {
+        type: String,
+        default: "",
+      },
+      github: {
+        type: String,
+        default: "",
+      },
+      website: {
+        type: String,
+        default: "",
+      },
+    },
+    account_info: {
+      total_posts: {
+        type: Number,
+        default: 0,
+      },
+      total_reads: {
+        type: Number,
+        default: 0,
+      },
+    },
+    loginType: {
+      type: String,
+      enum: AvailableSocialLogins,
+      default: UserLoginType.EMAIL_PASSWORD,
+      required: true,
+    },
+    refreshToken: {
+      type: String,
+    },
+    blogs: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Blog",
+      },
+    ],
   },
-  { timestamps: true }
+  {
+    timestamps: {
+      createdAt: "joinedAt",
+    },
+  }
 );
 
-userSchema.pre<IUser>("save", async function (next): Promise<void> {
-  if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 10);
+userSchema.pre("save", async function (next) {
+  if (this.isModified("profile_info.password") && this.profile_info?.password) {
+    this.profile_info.password = await bcrypt.hash(
+      this.profile_info.password,
+      10
+    );
+  }
   next();
 });
 
-userSchema.methods.isCorrectPassword = async function (
+userSchema.methods.isPasswordCorrect = async function (
   enteredPassword: string
-): Promise<boolean> {
-  return await bcrypt.compare(enteredPassword, this.password);
+) {
+  if (!this.profile_info?.password) throw new Error("Password not set");
+  return await bcrypt.compare(enteredPassword, this.profile_info.password);
 };
 
-userSchema.methods.generateAccessToken = function (): string {
-  return jwt.sign(
-    { _id: this._id, email: this.email, name: this.name },
-    ACCESS_TOKEN_SECRET,
-    { expiresIn: ACCESS_TOKEN_EXPIRY }
-  );
+userSchema.methods.generateAccessToken = function () {
+  const { email, fullname } = this.profile_info;
+  const payload = { id: this._id, role: this.role, email, fullname };
+  return jwt.sign(payload, ACCESS_TOKEN_SECRET, {
+    expiresIn: ACCESS_TOKEN_EXPIRY,
+  });
 };
 
-const User = model<IUser>("User", userSchema);
+userSchema.methods.generateRefreshToken = function () {
+  const payload = { id: this._id };
+  const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
+    expiresIn: REFRESH_TOKEN_EXPIRY,
+  });
+  this.refreshToken = refreshToken;
+  return refreshToken;
+};
+
+const User: Model<IUser> = model("User", userSchema);
 
 export default User;

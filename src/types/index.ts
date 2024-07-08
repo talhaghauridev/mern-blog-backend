@@ -1,23 +1,33 @@
-import { IUser } from "../models/user.model";
+import { Schema } from "mongoose";
 
-type Resolvers = {
-  Query?: any;
-  Mutation?: any;
+type UserType = {
+  profile_info: {
+    fullName: string;
+    email: string;
+    username: string;
+    bio?: string;
+    password: string;
+    profileImage?: {
+      url: string;
+      public_url: string;
+    };
+  };
+  role: string;
+  social_links: {
+    youtube?: string;
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+    github?: string;
+    website?: string;
+  };
+  account_info: {
+    total_posts: number;
+    total_reads: number;
+  };
+  loginType: string;
+  refreshToken?: string;
+  blogs: Schema.Types.ObjectId[];
 };
 
-type Context = {
-  user?: IUser | null;
-  error: string | null;
-};
-
-type AccessTokenResponse = {
-  accessToken: string;
-  loggedUser: IUser;
-};
-
-type ImageType = {
-  url: string;
-  public_id: string;
-};
-
-export type { Resolvers, Context, AccessTokenResponse, ImageType };
+export { UserType };

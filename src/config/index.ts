@@ -5,22 +5,43 @@ import {
   CLOUDINARY_API_SECRET,
   CLOUDINARY_NAME,
   FRONTEND_URI,
-} from "../constants";
+  SESSION_SECRET,
+} from "../constants/env";
+
 import { ConfigOptions } from "cloudinary";
-const corsConfig: CorsOptions = {
+import compressionMiddleware from "compression";
+import { SessionOptions } from "express-session";
+const cors: CorsOptions = {
   credentials: true,
-  methods: "GET,POST,PUT,DELETE",
-  origin: FRONTEND_URI,
+  origin: [FRONTEND_URI, "*"],
 };
 
-const dotenvConfig: DotenvConfigOptions = {
+const dotenv: DotenvConfigOptions = {
   path: "./.env",
 };
 
-const cloudinaryConfig: ConfigOptions = {
+const cloudinary: ConfigOptions = {
   cloud_name: CLOUDINARY_NAME,
   api_key: CLOUDINARY_API_KEY,
   api_secret: CLOUDINARY_API_SECRET,
 };
 
-export { corsConfig, dotenvConfig, cloudinaryConfig };
+const compression: compressionMiddleware.CompressionOptions = {
+  level: 6,
+  filter: (req, res) => {
+    if (req.headers["x-no-compression"]) {
+      return false;
+    }
+    return compressionMiddleware.filter(req, res);
+  },
+};
+
+const session: SessionOptions = {
+  secret: SESSION_SECRET,
+  resave: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24,
+  },
+  saveUninitialized: false,
+};
+export const config = { cors, dotenv, cloudinary, compression, session };

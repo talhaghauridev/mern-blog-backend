@@ -1,30 +1,22 @@
 import { expressMiddleware } from "@apollo/server/express4";
 import app from "./app";
-import { verifyToken } from "./middlewares/auth.middleware";
+import { ENV_MODE, PORT } from "./constants/env";
+import createApolloGraphqlServer from "./graphql";
 import connectDB from "./db";
-import { PORT } from "./constants";
-import createApolloGraphgqlServer from "./graphql";
+import { AvailableSocialLogins } from "./constants/constants";
 
-const init = async (): Promise<void> => {
-  const server = await createApolloGraphgqlServer();
+const init = async () => {
+  const server = await createApolloGraphqlServer();
 
-  app.use("/graphql", expressMiddleware(server, { context: verifyToken }));
+  app.use("/graphql", expressMiddleware(server));
 
-  app.listen(PORT, () => {
-    console.log(`Server is running in port http://localhost:${PORT}`);
-  });
+  app.listen(PORT, () =>
+    console.log(
+      `Server is running in http://localhost:${PORT} in ${ENV_MODE} Mode `
+    )
+  );
 };
 
-app.get("/", (req, res, next) => {
-  res.status(200).json({
-    success: true,
-    message: "Server is running fine".repeat(300),
-  });
+init().then(async () => {
+  await connectDB();
 });
-
-// connectDB().then(() => {
-//   init();
-// });
-init();
-
-export default app;
