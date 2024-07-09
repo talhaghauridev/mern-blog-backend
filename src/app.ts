@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(compression(config.compression));
 app.use(useragent.express());
-app.use(morgan("common"));
+app.use(morgan("dev"));
 
 app.get("/", async (req: any, res) => {
   res.status(200).json({

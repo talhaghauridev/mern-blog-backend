@@ -1,5 +1,5 @@
 import Blog from "./blog";
-import User from "./user";
+import User from "./auth";
 
 const typeDefs = [Blog.typeDefs, User.typeDefs];
 

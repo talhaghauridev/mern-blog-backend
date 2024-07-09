@@ -46,20 +46,20 @@ type User {
   role:Role!
   loginType:LoginType!
   blogs:[String]!
+  refreshToken:String
   joinedAt:Date!
   updatedAt:Date!
 }
-  type RefreshToken {
+
+type RefreshToken {
     refreshToken:String!
     accessToken:String!
   }
-type UserResponse  {
+type AuthUserResponse  {
   user:User!
   refreshToken:String!
   accessToken:String!
 }
-
-
 
 input LoginInput  {
   email:String!
@@ -73,9 +73,9 @@ input SignupInput{
 }
   type Mutation {
     refreshAccessToken(refreshToken:String!):RefreshToken!
-    signUpGoogle(accessToken: String!): UserResponse!
-    login(input:LoginInput):UserResponse!
-    signup(input:SignupInput):UserResponse!
+    signUpGoogle(accessToken: String!): AuthUserResponse!
+    login(input:LoginInput):AuthUserResponse!
+    signup(input:SignupInput):AuthUserResponse!
   }
 
 `;

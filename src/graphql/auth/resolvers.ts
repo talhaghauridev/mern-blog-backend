@@ -1,29 +1,30 @@
 import jwt from "jsonwebtoken";
-import { ErrorTypes } from "../../constants/ErrorTypes";
-import ApolloError from "../../utils/ApolloError";
+import { UserLoginType } from "../../constants/constants";
 import { REFRESH_TOKEN_SECRET } from "../../constants/env";
-import UserService from "../../services/user.services";
+import { ErrorTypes } from "../../constants/ErrorTypes";
 import { IUser } from "../../models/user.model";
+import UserService from "../../services/user.services";
+import ApolloError from "../../utils/ApolloError";
 import { generateAccessAndRefreshTokens } from "../../utils/generateToken";
 import getGoogleProfile from "../../utils/getGoogleProfile";
-import { UserLoginType } from "../../constants/constants";
-import { Context, verifyUser } from "../../utils/context";
+import { EMAIL_REGEX, PASSWORD_REGEX } from "../../utils/utils";
+import {
+  LoginInput,
+  RefreshTokenInput,
+  SignUpGoogleInput,
+  SignupInput,
+} from "./interfaces";
 
-const queries = {
-  getUser: async (_: any, arg: any, ctx: Context) => {
-    const user = await verifyUser(ctx);
-    return "Hello World";
-  },
-};
+const queries = {};
 
 const mutations = {
-  login: async (_: any, { input }: any) => {
+  login: async (_: any, { input }: LoginInput) => {
     const { email, password } = input;
 
     if (!email || !password) {
       return ApolloError("Please fill all fields", ErrorTypes.VALIDATION_ERROR);
     }
-    const user = (await UserService.findByEmail(email!)) as IUser;
+    const user = (await UserService.findByEmail(email)) as IUser;
     if (!user) {
       return ApolloError("Invalid Credentials", ErrorTypes.BAD_USER_INPUT);
     }
@@ -33,7 +34,7 @@ const mutations = {
         ErrorTypes.UNAUTHORIZED
       );
     }
-    const isPassword = await user.isPasswordCorrect(password!);
+    const isPassword = await user.isPasswordCorrect(password);
     if (!isPassword) {
       return ApolloError("Invalid Credentials", ErrorTypes.BAD_USER_INPUT);
     }
@@ -48,12 +49,20 @@ const mutations = {
     };
   },
 
-  signup: async (_: any, { input }: any) => {
+  signup: async (_: any, { input }: SignupInput) => {
     const { fullName, email, password } = input;
     if (!fullName || !email || !password) {
       return ApolloError("Please fill all fields", ErrorTypes.VALIDATION_ERROR);
     }
-
+    if (!EMAIL_REGEX.test(email)) {
+      return ApolloError("Email is invalid", ErrorTypes.BAD_REQUEST);
+    }
+    if (!PASSWORD_REGEX.test(password)) {
+      return ApolloError(
+        "Password should be 6 to 20 characters long with a numeric,1 lowercase and 1 uppercase letters",
+        ErrorTypes.BAD_USER_INPUT
+      );
+    }
     const userExist = (await UserService.findByEmail(email)) as IUser;
     if (userExist) {
       return ApolloError("User already exists", ErrorTypes.ALREADY_EXISTS);
@@ -84,7 +93,7 @@ const mutations = {
     };
   },
 
-  signUpGoogle: async (_: any, arg: any) => {
+  signUpGoogle: async (_: any, arg: SignUpGoogleInput) => {
     const incomingAccessToken: string = arg.accessToken;
     if (!incomingAccessToken) {
       return ApolloError("Access Token is required", ErrorTypes.BAD_USER_INPUT);
@@ -114,7 +123,9 @@ const mutations = {
             ErrorTypes.UNAUTHORIZED
           );
         } else {
-          return { user, accessToken: "sadsad", refreshToken: "asdsadads" };
+          const { accessToken, refreshToken } =
+            await generateAccessAndRefreshTokens(user._id as string);
+          return { user, accessToken, refreshToken };
         }
       } else {
         const createdUser = await UserService.createUser({
@@ -132,10 +143,12 @@ const mutations = {
         });
 
         if (createdUser) {
+          const { accessToken, refreshToken } =
+            await generateAccessAndRefreshTokens(createdUser._id as string);
           return {
             user: createdUser,
-            accessToken: "sadsad",
-            refreshToken: "asdsadads",
+            accessToken,
+            refreshToken,
           };
         } else {
           return ApolloError(
@@ -152,7 +165,7 @@ const mutations = {
     }
   },
 
-  refreshAccessToken: async (_: any, arg: any) => {
+  refreshAccessToken: async (_: any, arg: RefreshTokenInput) => {
     const incomingRefreshToken: string = arg.refreshToken;
     if (!incomingRefreshToken) {
       return ApolloError(
@@ -186,6 +199,4 @@ const mutations = {
   },
 };
 
-const extraResolvers = {};
-
-export const resolvers = { queries, mutations, extraResolvers };
+export const resolvers = { queries, mutations };

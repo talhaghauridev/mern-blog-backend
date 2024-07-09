@@ -41,7 +41,7 @@ const verifyUser = async ({ token }: Context) => {
     return ApolloError("Invalid Access Token", ErrorTypes.UNAUTHENTICATED);
   }
 
-  cacheUser.set(user._id, user);
+  cacheUser.set((user._id as string).toString(), user);
   return user;
 };
 
