@@ -7,10 +7,10 @@ import {
   FRONTEND_URI,
   SESSION_SECRET,
 } from "../constants/env";
-
 import { ConfigOptions } from "cloudinary";
 import compressionMiddleware from "compression";
 import { SessionOptions } from "express-session";
+import { HelmetOptions } from "helmet";
 const cors: CorsOptions = {
   credentials: true,
   origin: [FRONTEND_URI, "*"],
@@ -44,4 +44,15 @@ const session: SessionOptions = {
   },
   saveUninitialized: false,
 };
-export const config = { cors, dotenv, cloudinary, compression, session };
+
+const helmet: HelmetOptions = {
+  contentSecurityPolicy: false,
+};
+export const config = {
+  cors,
+  dotenv,
+  cloudinary,
+  compression,
+  session,
+  helmet,
+};

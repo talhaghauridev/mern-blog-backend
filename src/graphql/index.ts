@@ -1,16 +1,17 @@
-import { ApolloServer } from "@apollo/server";
+import { ApolloServer, BaseContext } from "@apollo/server";
 import resolvers from "./resolvers";
 import typeDefs from "./typeDefs";
-const createApolloGraphqlServer = async () => {
+
+const createApolloGraphgqlServer = async () => {
   const server = new ApolloServer({
-    resolvers,
     typeDefs,
+    resolvers,
     introspection: true,
-    includeStacktraceInErrorResponses: false,
+    includeStacktraceInErrorResponses: false, //to exclude stackTrace parameter from error messages
   });
+
   await server.start();
 
   return server;
 };
-
-export default createApolloGraphqlServer;
+export default createApolloGraphgqlServer;

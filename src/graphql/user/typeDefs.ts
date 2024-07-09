@@ -1,12 +1,83 @@
 const typeDefs = `#graphql
+scalar Date
   type Query {
-    hello: String!
-    a:Boolean
+    getUser:String
   }
 
-#   type Mutation {
+  enum Role {
+    USER 
+    ADMIN
+  } 
+  enum LoginType {
+   GOOGLE
+   EMAIL_PASSWORD
+  }
 
-#   }
+  type ProfileImage {
+    url:String!
+    public_url:String
+  }
+  type ProfileInfo {
+    fullName:String!
+   email:String!
+   username:String!
+   bio:String
+  }
+
+  type SocialLinks {
+    youtube: String
+    instagram: String
+    facebook: String
+    twitter: String
+    github: String
+    website: String
+  },
+  type AccountInfo { 
+    total_posts: Int!
+    total_reads: Int!
+    },
+
+
+type User {
+  _id:ID!
+  profile_info:ProfileInfo!
+  social_links:SocialLinks!
+  account_info:AccountInfo!
+  role:Role!
+  loginType:LoginType!
+  blogs:[String]!
+  joinedAt:Date!
+  updatedAt:Date!
+}
+  type RefreshToken {
+    refreshToken:String!
+    accessToken:String!
+  }
+type UserResponse  {
+  user:User!
+  refreshToken:String!
+  accessToken:String!
+}
+
+
+
+input LoginInput  {
+  email:String!
+  password:String!
+}
+
+input SignupInput{
+  fullName:String!
+  email:String!
+  password:String!
+}
+  type Mutation {
+    refreshAccessToken(refreshToken:String!):RefreshToken!
+    signUpGoogle(accessToken: String!): UserResponse!
+    login(input:LoginInput):UserResponse!
+    signup(input:SignupInput):UserResponse!
+  }
+
 `;
 
 export { typeDefs };

@@ -1,5 +1,5 @@
 import { UserLoginType, UserRolesEnum } from "../constants/constants";
-import User from "../models/user.model";
+import User, { IUser } from "../models/user.model";
 import { UserType } from "../types";
 
 class UserService {

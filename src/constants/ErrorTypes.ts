@@ -17,6 +17,10 @@ export const ErrorTypes = {
     errorCode: "UNAUTHENTICATED",
     errorStatus: 401,
   },
+  VALIDATION_ERROR: {
+    errorCode: ApolloServerErrorCode.BAD_USER_INPUT,
+    errorStatus: 422,
+  },
   ALREADY_EXISTS: {
     errorCode: "ALREADY_EXISTS",
     errorStatus: 400,
@@ -24,5 +28,10 @@ export const ErrorTypes = {
   INTERNAL_SERVER_ERROR: {
     errorCode: ApolloServerErrorCode.INTERNAL_SERVER_ERROR,
     errorStatus: 500,
+  },
+
+  UNAUTHORIZED: {
+    errorCode: "UNAUTHORIZED",
+    errorStatus: 403,
   },
 };

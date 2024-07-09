@@ -1,14 +1,19 @@
 import { expressMiddleware } from "@apollo/server/express4";
 import app from "./app";
 import { ENV_MODE, PORT } from "./constants/env";
-import createApolloGraphqlServer from "./graphql";
 import connectDB from "./db";
-import { AvailableSocialLogins } from "./constants/constants";
+import createApolloGraphqlServer from "./graphql";
+import { context } from "./utils/context";
 
 const init = async () => {
   const server = await createApolloGraphqlServer();
 
-  app.use("/graphql", expressMiddleware(server));
+  app.use(
+    "/graphql",
+    expressMiddleware(server, {
+      context,
+    })
+  );
 
   app.listen(PORT, () =>
     console.log(
