@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { UserLoginType } from "../../constants/constants";
 import { REFRESH_TOKEN_SECRET } from "../../constants/env";
 import { ErrorTypes } from "../../constants/ErrorTypes";
-import { IUser } from "../../models/user.model";
+import User, { IUser } from "../../models/user.model";
 import UserService from "../../services/user.services";
 import ApolloError from "../../utils/ApolloError";
 import { generateAccessAndRefreshTokens } from "../../utils/generateToken";
@@ -14,6 +14,7 @@ import {
   SignUpGoogleInput,
   SignupInput,
 } from "./interfaces";
+import { Context, verifyUser } from "../../utils/context";
 
 const queries = {};
 
@@ -196,6 +197,23 @@ const mutations = {
       user.id
     );
     return { accessToken, refreshToken };
+  },
+  logout: async (_: any, __: any, ctx: Context) => {
+    const user = await verifyUser(ctx);
+    const removeRefreshToken = await User.findByIdAndUpdate(
+      user._id,
+      {
+        $set: {
+          refreshToken: "",
+        },
+      },
+      { new: true }
+    );
+    if (!removeRefreshToken) {
+      return ApolloError("Error removing the token ", ErrorTypes.BAD_REQUEST);
+    }
+
+    return "User logged out";
   },
 };
 

@@ -20,14 +20,19 @@ const context = async ({ req, res }: ExpressContextFunctionArgument) => {
   };
 };
 
-const cacheUser = new Map();
-const verifyUser = async ({ token }: Context) => {
+const cacheUser = new Map<string, IUser>();
+
+const verifyUser = async ({ token }: Context): Promise<IUser> => {
   if (!token) {
     return ApolloError("Token is required", ErrorTypes.BAD_USER_INPUT);
   }
-
-  const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET) as { id: string };
-  if (!decoded) {
+  let decoded;
+  try {
+    decoded = jwt.verify(token, ACCESS_TOKEN_SECRET) as { id: string };
+    if (!decoded) {
+      return ApolloError("Invalid Access Token", ErrorTypes.UNAUTHENTICATED);
+    }
+  } catch (error) {
     return ApolloError("Invalid Access Token", ErrorTypes.UNAUTHENTICATED);
   }
 
@@ -36,7 +41,7 @@ const verifyUser = async ({ token }: Context) => {
     return cachedUser;
   }
 
-  const user = (await UserService.findById(decoded.id)) as IUser;
+  const user = await UserService.findById(decoded.id);
   if (!user) {
     return ApolloError("Invalid Access Token", ErrorTypes.UNAUTHENTICATED);
   }

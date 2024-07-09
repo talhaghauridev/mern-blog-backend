@@ -76,6 +76,7 @@ input SignupInput{
     signUpGoogle(accessToken: String!): AuthUserResponse!
     login(input:LoginInput):AuthUserResponse!
     signup(input:SignupInput):AuthUserResponse!
+    logout:String!
   }
 
 `;
