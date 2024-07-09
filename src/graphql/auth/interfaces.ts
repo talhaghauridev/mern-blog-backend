@@ -1,20 +1,33 @@
-interface LoginInput {
+type LoginInput = {
   input: { email: string; password: string };
-}
+};
 
-interface SignupInput {
+type SignupInput = {
   input: {
     fullName: string;
     email: string;
     password: string;
   };
-}
+};
 
-interface SignUpGoogleInput {
+type SignUpGoogleInput = {
   accessToken: string;
-}
-interface RefreshTokenInput {
+};
+type RefreshTokenInput = {
   refreshToken: string;
-}
+};
 
-export type { LoginInput, SignupInput, SignUpGoogleInput, RefreshTokenInput };
+type ChangePasswordInput = {
+  input: {
+    oldPassword: string;
+    newPassword: string;
+  };
+};
+
+export type {
+  LoginInput,
+  SignupInput,
+  SignUpGoogleInput,
+  RefreshTokenInput,
+  ChangePasswordInput,
+};

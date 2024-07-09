@@ -9,6 +9,7 @@ import { generateAccessAndRefreshTokens } from "../../utils/generateToken";
 import getGoogleProfile from "../../utils/getGoogleProfile";
 import { EMAIL_REGEX, PASSWORD_REGEX } from "../../utils/utils";
 import {
+  ChangePasswordInput,
   LoginInput,
   RefreshTokenInput,
   SignUpGoogleInput,
@@ -214,6 +215,33 @@ const mutations = {
     }
 
     return "User logged out";
+  },
+  changePassword: async (
+    _: any,
+    { input }: ChangePasswordInput,
+    ctx: Context
+  ) => {
+    const user = await verifyUser(ctx);
+    const { oldPassword, newPassword } = input;
+    if (!oldPassword || !newPassword) {
+      return ApolloError("Please fill all fields", ErrorTypes.VALIDATION_ERROR);
+    }
+
+    const isUser = (await UserService.findById(user._id as string)) as IUser;
+
+    const isPasswordMatched = await user.isPasswordCorrect(oldPassword);
+
+    if (!isPasswordMatched) {
+      return ApolloError(
+        "Old password is incorrect ",
+        ErrorTypes.BAD_USER_INPUT
+      );
+    }
+
+    isUser.profile_info.password = newPassword;
+
+    isUser.save({ validateBeforeSave: false });
+    return "Password changed successfully";
   },
 };
 

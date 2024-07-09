@@ -71,11 +71,18 @@ input SignupInput{
   email:String!
   password:String!
 }
+
+input ChangePasswordInput {
+ oldPassword:String!
+ newPassword:String!
+ confirmPassword:String!
+}
   type Mutation {
     refreshAccessToken(refreshToken:String!):RefreshToken!
     signUpGoogle(accessToken: String!): AuthUserResponse!
-    login(input:LoginInput):AuthUserResponse!
-    signup(input:SignupInput):AuthUserResponse!
+    login(input:LoginInput!):AuthUserResponse!
+    signup(input:SignupInput!):AuthUserResponse!
+    changePassword(input:ChangePasswordInput!):String!
     logout:String!
   }
 
