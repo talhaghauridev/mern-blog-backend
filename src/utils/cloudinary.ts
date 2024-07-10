@@ -17,7 +17,7 @@ const uploadCloudinary = async (
 
     return response;
   } catch (error: any) {
-    return ApolloError(`Upload Image error:${error}`, ErrorTypes.BAD_REQUEST);
+    return ApolloError(`Upload Image error :${error}`, ErrorTypes.BAD_REQUEST);
   }
 };
 
@@ -25,7 +25,7 @@ const removeFromCloudinary = async (public_id: string): Promise<void> => {
   try {
     await v2.uploader.destroy(public_id);
   } catch (error: any) {
-    return ApolloError(`Remove Image error:${error}`, ErrorTypes.BAD_REQUEST);
+    return ApolloError(`Remove Image error :${error}`, ErrorTypes.BAD_REQUEST);
   }
 };
 

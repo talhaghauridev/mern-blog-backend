@@ -3,7 +3,11 @@ import User from "../../models/user.model";
 import ApolloError from "../../utils/ApolloError";
 import { removeFromCloudinary, uploadCloudinary } from "../../utils/cloudinary";
 import { Context, verifyUser } from "../../utils/context";
-import { isHttpsUrl, validateSocialLinks } from "../../utils/utils";
+import {
+  isBase64Image,
+  isHttpsUrl,
+  validateSocialLinks,
+} from "../../utils/utils";
 import {
   SearchUsers,
   UpdateProfile,
@@ -56,6 +60,9 @@ const mutations = {
     const user = await verifyUser(ctx);
     if (!file) {
       return ApolloError("No file provided", ErrorTypes.BAD_USER_INPUT);
+    }
+    if (!isBase64Image(file)) {
+      return ApolloError("Invalid File", ErrorTypes.BAD_USER_INPUT);
     }
 
     const { profileImage } = user.profile_info;

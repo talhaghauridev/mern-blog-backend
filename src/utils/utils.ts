@@ -61,6 +61,11 @@ const validateSocialLinks = (social_links: UserType["social_links"]) => {
   return null;
 };
 
+const isBase64Image = (imageData: string) => {
+  const base64Regex = /^data:image\/(png|jpe?g|gif|webp);base64,/;
+  return base64Regex.test(imageData);
+};
+
 const isHttpsUrl = (url: string) => {
   try {
     const parsedUrl = new URL(url);
@@ -69,10 +74,12 @@ const isHttpsUrl = (url: string) => {
     return false;
   }
 };
+
 export {
   EMAIL_REGEX,
   isHttpsUrl,
   mergeResolvers,
   PASSWORD_REGEX,
   validateSocialLinks,
+  isBase64Image,
 };
