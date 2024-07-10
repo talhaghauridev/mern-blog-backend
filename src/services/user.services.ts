@@ -3,10 +3,10 @@ import User, { IUser } from "../models/user.model";
 import { UserType } from "../types";
 
 class UserService {
-  public static async findById(id: string) {
+  public static findById(id: string) {
     return User.findById(id);
   }
-  public static async findByEmail(email: string) {
+  public static findByEmail(email: string) {
     return User.findOne({ "profile_info.email": email });
   }
   public static async createUser(

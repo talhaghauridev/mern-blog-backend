@@ -2,9 +2,10 @@ import jwt from "jsonwebtoken";
 import { UserLoginType } from "../../constants/constants";
 import { REFRESH_TOKEN_SECRET } from "../../constants/env";
 import { ErrorTypes } from "../../constants/ErrorTypes";
-import User, { IUser } from "../../models/user.model";
+import User from "../../models/user.model";
 import UserService from "../../services/user.services";
 import ApolloError from "../../utils/ApolloError";
+import { Context, verifyUser } from "../../utils/context";
 import { generateAccessAndRefreshTokens } from "../../utils/generateToken";
 import getGoogleProfile from "../../utils/getGoogleProfile";
 import { EMAIL_REGEX, PASSWORD_REGEX } from "../../utils/utils";
@@ -15,7 +16,6 @@ import {
   SignUpGoogleInput,
   SignupInput,
 } from "./interfaces";
-import { Context, verifyUser } from "../../utils/context";
 
 const queries = {};
 
@@ -26,7 +26,7 @@ const mutations = {
     if (!email || !password) {
       return ApolloError("Please fill all fields", ErrorTypes.VALIDATION_ERROR);
     }
-    const user = (await UserService.findByEmail(email)) as IUser;
+    const user = await UserService.findByEmail(email);
     if (!user) {
       return ApolloError("Invalid Credentials", ErrorTypes.BAD_USER_INPUT);
     }
@@ -41,11 +41,13 @@ const mutations = {
       return ApolloError("Invalid Credentials", ErrorTypes.BAD_USER_INPUT);
     }
 
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-      user._id as string
-    );
+    const {
+      accessToken,
+      refreshToken,
+      user: loggedUser,
+    } = await generateAccessAndRefreshTokens(user._id as string);
     return {
-      user,
+      user: loggedUser,
       accessToken,
       refreshToken,
     };
@@ -57,7 +59,7 @@ const mutations = {
       return ApolloError("Please fill all fields", ErrorTypes.VALIDATION_ERROR);
     }
     if (!EMAIL_REGEX.test(email)) {
-      return ApolloError("Email is invalid", ErrorTypes.BAD_REQUEST);
+      return ApolloError("Email is invalid", ErrorTypes.BAD_USER_INPUT);
     }
     if (!PASSWORD_REGEX.test(password)) {
       return ApolloError(
@@ -65,12 +67,12 @@ const mutations = {
         ErrorTypes.BAD_USER_INPUT
       );
     }
-    const userExist = (await UserService.findByEmail(email)) as IUser;
+    const userExist = await UserService.findByEmail(email);
     if (userExist) {
       return ApolloError("User already exists", ErrorTypes.ALREADY_EXISTS);
     }
     const username: string = email.split("@")[0];
-    const user = await UserService.createUser({
+    const newUser = await UserService.createUser({
       loginType: UserLoginType.EMAIL_PASSWORD,
       profile_info: {
         email,
@@ -79,15 +81,14 @@ const mutations = {
         username,
       },
     });
-    if (!user) {
+    if (!newUser) {
       return ApolloError(
         "Error while creating user",
         ErrorTypes.INTERNAL_SERVER_ERROR
       );
     }
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-      user._id as string
-    );
+    const { accessToken, refreshToken, user } =
+      await generateAccessAndRefreshTokens(newUser._id as string);
     return {
       user,
       accessToken,
@@ -111,7 +112,7 @@ const mutations = {
     }
 
     if (data.user) {
-      const user = (await UserService.findByEmail(data.user.email)) as IUser;
+      const user = await UserService.findByEmail(data.user.email);
       console.log({ user });
 
       if (user) {
@@ -125,9 +126,12 @@ const mutations = {
             ErrorTypes.UNAUTHORIZED
           );
         } else {
-          const { accessToken, refreshToken } =
-            await generateAccessAndRefreshTokens(user._id as string);
-          return { user, accessToken, refreshToken };
+          const {
+            accessToken,
+            refreshToken,
+            user: loggedUser,
+          } = await generateAccessAndRefreshTokens(user._id as string);
+          return { user: loggedUser, accessToken, refreshToken };
         }
       } else {
         const createdUser = await UserService.createUser({
@@ -138,17 +142,17 @@ const mutations = {
             username: data.user.email.split("@")[0]!,
             profileImage: {
               url: data.user.picture!,
-              public_url: "",
+              public_id: "",
             },
           },
           loginType: UserLoginType.GOOGLE,
         });
 
         if (createdUser) {
-          const { accessToken, refreshToken } =
+          const { accessToken, refreshToken, user } =
             await generateAccessAndRefreshTokens(createdUser._id as string);
           return {
-            user: createdUser,
+            user,
             accessToken,
             refreshToken,
           };
@@ -168,7 +172,7 @@ const mutations = {
   },
 
   refreshAccessToken: async (_: any, arg: RefreshTokenInput) => {
-    const incomingRefreshToken: string = arg.refreshToken;
+    const incomingRefreshToken = arg.refreshToken;
     if (!incomingRefreshToken) {
       return ApolloError(
         "Refresh Token is required",
@@ -182,7 +186,7 @@ const mutations = {
     if (!decodedToken) {
       return ApolloError("Invalid Refresh Token", ErrorTypes.UNAUTHENTICATED);
     }
-    const user = (await UserService.findById(decodedToken.id)) as IUser;
+    const user = await UserService.findById(decodedToken.id);
     if (!user) {
       return ApolloError("Invalid Refresh Token", ErrorTypes.UNAUTHENTICATED);
     }
@@ -195,13 +199,13 @@ const mutations = {
     }
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-      user.id
+      user._id as string
     );
     return { accessToken, refreshToken };
   },
-  logout: async (_: any, __: any, ctx: Context) => {
+  logout: async (_: any, __: unknown, ctx: Context) => {
     const user = await verifyUser(ctx);
-    const removeRefreshToken = await User.findByIdAndUpdate(
+    const updateUser = await User.findByIdAndUpdate(
       user._id,
       {
         $set: {
@@ -210,7 +214,7 @@ const mutations = {
       },
       { new: true }
     );
-    if (!removeRefreshToken) {
+    if (!updateUser) {
       return ApolloError("Error removing the token ", ErrorTypes.BAD_REQUEST);
     }
 
@@ -226,9 +230,17 @@ const mutations = {
     if (!oldPassword || !newPassword) {
       return ApolloError("Please fill all fields", ErrorTypes.VALIDATION_ERROR);
     }
+    if (!PASSWORD_REGEX.test(newPassword)) {
+      return ApolloError(
+        "Password should be 6 to 20 characters long with a numeric,1 lowercase and 1 uppercase letters",
+        ErrorTypes.BAD_USER_INPUT
+      );
+    }
 
-    const isUser = (await UserService.findById(user._id as string)) as IUser;
-
+    const isUser = await UserService.findById(user._id as string);
+    if (!isUser) {
+      return ApolloError("User not found", ErrorTypes.NOT_FOUND);
+    }
     const isPasswordMatched = await user.isPasswordCorrect(oldPassword);
 
     if (!isPasswordMatched) {

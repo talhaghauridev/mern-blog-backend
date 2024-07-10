@@ -15,13 +15,15 @@ scalar Date
 
   type ProfileImage {
     url:String!
-    public_url:String
+    public_id:String
   }
   type ProfileInfo {
     fullName:String!
    email:String!
    username:String!
+   password:String
    bio:String
+   profileImage:ProfileImage!
   }
 
   type SocialLinks {

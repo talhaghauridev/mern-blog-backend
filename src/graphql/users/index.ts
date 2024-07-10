@@ -1,6 +1,6 @@
 import { resolvers } from "./resolvers";
 import { typeDefs } from "./typeDefs";
 
-const Blogs = { resolvers, typeDefs };
+const Users = { typeDefs, resolvers };
 
-export default Blogs;
+export default Users;

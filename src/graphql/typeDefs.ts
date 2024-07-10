@@ -1,6 +1,7 @@
-import Blog from "./blog";
-import User from "./auth";
+import Auth from "./auth";
+import User from "./users";
+// import Blog from "./blogs";
 
-const typeDefs = [Blog.typeDefs, User.typeDefs];
+const typeDefs = [Auth.typeDefs, User.typeDefs];
 
 export default typeDefs;

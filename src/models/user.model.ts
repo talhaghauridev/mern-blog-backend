@@ -54,9 +54,9 @@ const userSchema = new Schema<IUser>(
       profileImage: {
         url: {
           type: String,
-          default: "",
+          default: "https://via.placeholder.com/200x200.png",
         },
-        public_url: {
+        public_id: {
           type: String,
           default: "",
         },

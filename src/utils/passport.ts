@@ -55,7 +55,7 @@ passport.use(
               username: profile._json.email?.split("@")[0]!,
               profileImage: {
                 url: profile._json.picture!,
-                public_url: "",
+                public_id: "",
               },
             },
             loginType: UserLoginType.GOOGLE,

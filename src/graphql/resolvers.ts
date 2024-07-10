@@ -1,15 +1,16 @@
+import { mergeResolvers, ResolverModule, Resolvers } from "../utils/utils";
 import Auth from "./auth";
-import Blog from "./blog";
+import Users from "./users";
+// import Blogs from "./blogs";
 
-const resolvers = {
-  Query: {
-    ...{ ...Blog.resolvers.queries },
-  },
-  Mutation: {
-    // ...Blog.resolvers.mutations,
-    ...{ ...Auth.resolvers.mutations },
-  },
-  // ...Blog.resolvers.extraResolvers,
+const resolverModules: ResolverModule[] = [Auth, Users];
+
+const resolvers: Resolvers = {
+  Query: mergeResolvers(resolverModules, "queries"),
+  Mutation: mergeResolvers(resolverModules, "mutations"),
+  ...(mergeResolvers(resolverModules, "extraResolvers") && {
+    ...mergeResolvers(resolverModules, "extraResolvers"),
+  }),
 };
 
 export default resolvers;

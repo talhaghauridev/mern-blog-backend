@@ -9,7 +9,7 @@ type UserType = {
     password: string;
     profileImage?: {
       url: string;
-      public_url: string;
+      public_id: string;
     };
   };
   role: string;

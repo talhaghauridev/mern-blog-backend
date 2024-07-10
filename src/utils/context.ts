@@ -41,9 +41,17 @@ const verifyUser = async ({ token }: Context): Promise<IUser> => {
     return cachedUser;
   }
 
-  const user = await UserService.findById(decoded.id);
+  const user = await UserService.findById(decoded.id).select(
+    "-profile_info.password"
+  );
   if (!user) {
     return ApolloError("Invalid Access Token", ErrorTypes.UNAUTHENTICATED);
+  }
+  if (!user.refreshToken) {
+    return ApolloError(
+      "User session has expired. Please log in again.",
+      ErrorTypes.UNAUTHORIZED
+    );
   }
 
   cacheUser.set((user._id as string).toString(), user);
