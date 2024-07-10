@@ -5,6 +5,7 @@ import { removeFromCloudinary, uploadCloudinary } from "../../utils/cloudinary";
 import { Context, verifyUser } from "../../utils/context";
 import { isHttpsUrl, validateSocialLinks } from "../../utils/utils";
 import {
+  SearchUsers,
   UpdateProfile,
   UploadPrfileImage,
   UserProfileInput,
@@ -14,6 +15,21 @@ const queries = {
   getMyProfile: async (_: any, args: any, ctx: Context) => {
     const user = await verifyUser(ctx);
     return user;
+  },
+  searchUsers: async (_: any, { input }: SearchUsers) => {
+    const { query = "", limit = 20 } = input;
+    try {
+      const users = await User.find({
+        "profile_info.username": new RegExp(query, "i"),
+      })
+        .limit(limit)
+        .select(
+          "profile_info.username profile_info.fullName profile_info.profileImage profile_info.bio profile_info.social_links"
+        );
+      return users;
+    } catch (error) {
+      return ApolloError(`Find Users Error: ${error}`, ErrorTypes.BAD_REQUEST);
+    }
   },
 };
 

@@ -14,4 +14,11 @@ type UpdateProfile = {
     Pick<IUser, "social_links">;
 };
 
-export { UpdateProfile, UploadPrfileImage, UserProfileInput };
+type SearchUsers = {
+  input: {
+    query: string;
+    limit?: number;
+  };
+};
+
+export { UpdateProfile, UploadPrfileImage, UserProfileInput, SearchUsers };

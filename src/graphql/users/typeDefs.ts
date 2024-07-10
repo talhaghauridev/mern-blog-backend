@@ -1,8 +1,18 @@
 import { gql } from "apollo-server-express";
+
 const typeDefs = gql`
   scalar Date
   type Query {
     getMyProfile: User!
+    searchUsers(input: SearchUsersInput!): SearchUsersResponse!
+  }
+
+  type SearchUsersResponse {
+    fullName: String!
+    username: String!
+    profile_image: ProfileImage!
+    social_links: SocialLinks!
+    bio: String
   }
 
   type UserProfileResponse {
@@ -12,6 +22,11 @@ const typeDefs = gql`
     account_info: AccountInfo!
     role: Role!
     joinedAt: Date!
+  }
+
+  input SearchUsersInput {
+    query: String!
+    limit: Int
   }
 
   input UpdateProfileInput {

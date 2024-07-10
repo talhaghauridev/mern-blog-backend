@@ -9,6 +9,9 @@ class UserService {
   public static findByEmail(email: string) {
     return User.findOne({ "profile_info.email": email });
   }
+  public static findByUsername(username: string) {
+    return User.findOne({ "profile_info.usename": username });
+  }
   public static async createUser(
     user: Pick<UserType, "profile_info" | "loginType" | "refreshToken">
   ) {
