@@ -1,4 +1,5 @@
 import { IUser } from "../../models/user.model";
+import { UserType } from "../../types";
 
 type UserProfileInput = {
   username: string;
@@ -9,8 +10,8 @@ type UploadPrfileImage = {
 };
 
 type UpdateProfile = {
-  input: Pick<IUser["profile_info"], "bio" | "username"> &
+  input: Pick<UserType["profile_info"], "bio" | "username"> &
     Pick<IUser, "social_links">;
 };
 
-export { UserProfileInput, UploadPrfileImage, UpdateProfile };
+export { UpdateProfile, UploadPrfileImage, UserProfileInput };

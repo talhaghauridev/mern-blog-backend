@@ -1,11 +1,11 @@
-import { IUser } from "../../models/user.model";
+import { UserType } from "../../types";
 
 type LoginInput = {
   input: { email: string; password: string };
 };
 
 type SignupInput = {
-  input: Pick<IUser["profile_info"], "fullName" | "email" | "password">;
+  input: Pick<UserType["profile_info"], "fullName" | "email" | "password">;
 };
 
 type SignUpGoogleInput = {
@@ -23,9 +23,9 @@ type ChangePasswordInput = {
 };
 
 export type {
-  LoginInput,
-  SignupInput,
-  SignUpGoogleInput,
-  RefreshTokenInput,
   ChangePasswordInput,
+  LoginInput,
+  RefreshTokenInput,
+  SignUpGoogleInput,
+  SignupInput,
 };

@@ -1,4 +1,5 @@
 import { IUser } from "../models/user.model";
+import { UserType } from "../types";
 
 const EMAIL_REGEX = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
@@ -33,7 +34,7 @@ const mergeResolvers = (
   }, {} as ResolverMap);
 };
 
-const validateSocialLinks = (social_links: IUser["social_links"]) => {
+const validateSocialLinks = (social_links: UserType["social_links"]) => {
   const socialLinksArray = Object.keys(
     social_links
   ) as (keyof IUser["social_links"])[];
@@ -57,8 +58,21 @@ const validateSocialLinks = (social_links: IUser["social_links"]) => {
       }
     }
   }
-  // All links are valid
   return null;
 };
 
-export { EMAIL_REGEX, PASSWORD_REGEX, mergeResolvers, validateSocialLinks };
+const isHttpsUrl = (url: string) => {
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.protocol === "https:";
+  } catch (error) {
+    return false;
+  }
+};
+export {
+  EMAIL_REGEX,
+  isHttpsUrl,
+  mergeResolvers,
+  PASSWORD_REGEX,
+  validateSocialLinks,
+};

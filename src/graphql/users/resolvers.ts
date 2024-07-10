@@ -3,7 +3,7 @@ import User from "../../models/user.model";
 import ApolloError from "../../utils/ApolloError";
 import { removeFromCloudinary, uploadCloudinary } from "../../utils/cloudinary";
 import { Context, verifyUser } from "../../utils/context";
-import { validateSocialLinks } from "../../utils/utils";
+import { isHttpsUrl, validateSocialLinks } from "../../utils/utils";
 import {
   UpdateProfile,
   UploadPrfileImage,
@@ -41,6 +41,7 @@ const mutations = {
     if (!file) {
       return ApolloError("No file provided", ErrorTypes.BAD_USER_INPUT);
     }
+
     const { profileImage } = user.profile_info;
     if (profileImage?.public_id && profileImage.url) {
       await removeFromCloudinary(profileImage.public_id);
@@ -70,12 +71,13 @@ const mutations = {
         ErrorTypes.BAD_USER_INPUT
       );
     }
-    const loggedUser = await User.findOne({
+    const existingUser = await User.findOne({
       "profile_info.username": username,
+      _id: { $ne: user._id },
     });
-    if (loggedUser) {
+    if (existingUser) {
       return ApolloError(
-        "Username is already token",
+        "Username is already taken",
         ErrorTypes.ALREADY_EXISTS
       );
     }
@@ -94,7 +96,7 @@ const mutations = {
     user.profile_info.bio = bio;
     user.profile_info.username = username;
     user.save({ validateBeforeSave: false });
-    return "";
+    return "Profile updated successfully";
   },
 };
 
