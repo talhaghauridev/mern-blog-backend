@@ -12,6 +12,7 @@ export type Context = ExpressContextFunctionArgument & {
 
 const context = async ({ req, res }: ExpressContextFunctionArgument) => {
   const token = req.headers.authorization || "";
+  console.log(context);
 
   return {
     token,

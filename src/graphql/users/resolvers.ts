@@ -3,6 +3,7 @@ import User from "../../models/user.model";
 import ApolloError from "../../utils/ApolloError";
 import { removeFromCloudinary, uploadCloudinary } from "../../utils/cloudinary";
 import { Context, verifyUser } from "../../utils/context";
+import { validateSocialLinks } from "../../utils/utils";
 import {
   UpdateProfile,
   UploadPrfileImage,
@@ -55,7 +56,46 @@ const mutations = {
     await user.save({ validateBeforeSave: false });
     return response.secure_url;
   },
-  updateProfile: async (_: any, { input }: UpdateProfile) => {},
+
+  updateProfile: async (_: any, { input }: UpdateProfile, ctx: Context) => {
+    const user = await verifyUser(ctx);
+    const { username, bio, social_links } = input;
+    if (!username || !bio) {
+      return ApolloError("Please fill all fields", ErrorTypes.VALIDATION_ERROR);
+    }
+
+    if (username.length < 3) {
+      return ApolloError(
+        "Username should be at least 3 letters long",
+        ErrorTypes.BAD_USER_INPUT
+      );
+    }
+    const loggedUser = await User.findOne({
+      "profile_info.username": username,
+    });
+    if (loggedUser) {
+      return ApolloError(
+        "Username is already token",
+        ErrorTypes.ALREADY_EXISTS
+      );
+    }
+
+    const isEditLinks = Object.values(social_links).some(
+      (link) => link !== undefined && link !== null && link !== ""
+    );
+    if (isEditLinks) {
+      const validationResult = validateSocialLinks(social_links);
+      if (validationResult) {
+        return ApolloError(validationResult.message, ErrorTypes.BAD_USER_INPUT);
+      }
+      user.social_links = social_links;
+    }
+
+    user.profile_info.bio = bio;
+    user.profile_info.username = username;
+    user.save({ validateBeforeSave: false });
+    return "";
+  },
 };
 
 const extraResolvers = {};

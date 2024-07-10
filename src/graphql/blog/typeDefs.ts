@@ -1,12 +1,14 @@
-const typeDefs = `#graphql
+import { gql } from "apollo-server-express";
+
+const typeDefs = gql`
   type Query {
     hello: String!
-    a:Boolean
+    a: Boolean
   }
 
-#   type Mutation {
+  #   type Mutation {
 
-#   }
+  #   }
 `;
 
 export { typeDefs };

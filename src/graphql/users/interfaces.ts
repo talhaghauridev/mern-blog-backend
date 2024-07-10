@@ -10,7 +10,7 @@ type UploadPrfileImage = {
 
 type UpdateProfile = {
   input: Pick<IUser["profile_info"], "bio" | "username"> &
-    IUser["social_links"];
+    Pick<IUser, "social_links">;
 };
 
 export { UserProfileInput, UploadPrfileImage, UpdateProfile };

@@ -1,13 +1,11 @@
+import { IUser } from "../../models/user.model";
+
 type LoginInput = {
   input: { email: string; password: string };
 };
 
 type SignupInput = {
-  input: {
-    fullName: string;
-    email: string;
-    password: string;
-  };
+  input: Pick<IUser["profile_info"], "fullName" | "email" | "password">;
 };
 
 type SignUpGoogleInput = {
