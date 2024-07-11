@@ -75,6 +75,30 @@ const isHttpsUrl = (url: string) => {
   }
 };
 
+const extractFields = (info: any, parentPath = ""): string[] => {
+  let fields: string[] = [];
+  if (!info?.fieldNodes?.[0]?.selectionSet?.selections) {
+    return fields;
+  }
+
+  const selections = info.fieldNodes[0].selectionSet.selections;
+  selections.forEach((selection: any) => {
+    if (selection.kind === "Field") {
+      const fieldName = selection.name.value;
+      const fullPath = parentPath ? `${parentPath}.${fieldName}` : fieldName;
+
+      if (selection.selectionSet) {
+        fields = fields.concat(
+          extractFields({ fieldNodes: [selection] }, fullPath)
+        );
+      } else {
+        fields.push(fullPath);
+      }
+    }
+  });
+
+  return fields;
+};
 export {
   EMAIL_REGEX,
   isHttpsUrl,
@@ -82,4 +106,5 @@ export {
   PASSWORD_REGEX,
   validateSocialLinks,
   isBase64Image,
+  extractFields,
 };

@@ -27,8 +27,8 @@ const typeDefs = gql`
   }
 
   type UserBlogsResult {
-    blogs: String
-    blogCount: Int!
+    blogs: String!
+    count: Int!
   }
 
   #  Mutations

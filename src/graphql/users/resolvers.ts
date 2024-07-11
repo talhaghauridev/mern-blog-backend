@@ -4,9 +4,12 @@ import User from "../../models/user.model";
 import ApolloError from "../../utils/ApolloError";
 import { removeFromCloudinary, uploadCloudinary } from "../../utils/cloudinary";
 import { Context, verifyUser } from "../../utils/context";
-import { isBase64Image, validateSocialLinks } from "../../utils/utils";
 import {
-  BlogCount,
+  extractFields,
+  isBase64Image,
+  validateSocialLinks,
+} from "../../utils/utils";
+import {
   GetUserBlogs,
   SearchUsers,
   UpdateProfile,
@@ -15,7 +18,7 @@ import {
 } from "./interfaces";
 
 const queries = {
-  getMyProfile: async (_: any, args: any, ctx: Context) => {
+  getMyProfile: async (_: any, args: any, ctx: Context, info: any) => {
     const user = await verifyUser(ctx);
     return user;
   },
@@ -45,8 +48,14 @@ const queries = {
       );
     }
   },
-  getUserBlogs: async (_: any, { input }: GetUserBlogs, ctx: Context) => {
+  getUserBlogs: async (
+    _: any,
+    { input }: GetUserBlogs,
+    ctx: Context,
+    info: any
+  ) => {
     const user = await verifyUser(ctx);
+    const fields = extractFields(info);
     const { page = 1, draft, query, limit = 5, deletedDocCount } = input;
     let skip = (page - 1) * limit;
     if (deletedDocCount) {
@@ -62,11 +71,16 @@ const queries = {
         .limit(limit)
         .select("-draft -_id");
 
-      const blogCount = await Blog.countDocuments({
-        author: user._id,
-        draft,
-        title: new RegExp(query, "i"),
-      });
+      if (fields.includes("count")) {
+        console.log("Hello", fields);
+
+        const count = await Blog.countDocuments({
+          author: user._id,
+          draft,
+          title: new RegExp(query, "i"),
+        });
+        return { blogs: "Hello World", count };
+      }
 
       return { blogs: "Hello World" };
     } catch (error: any) {
@@ -166,26 +180,6 @@ const mutations = {
   },
 };
 
-const extraResolvers = {
-  UserBlogsResult: {
-    blogCount: async (
-      _: any,
-      { input }: BlogCount,
-      ctx: Context,
-      info: string
-    ) => {
-      const user = await verifyUser(ctx);
-      console.log(info);
-
-      const { draft, query } = input;
-      const blogsCount = await Blog.countDocuments({
-        author: user._id,
-        draft,
-        title: new RegExp(query, "i"),
-      });
-      return blogsCount;
-    },
-  },
-};
+const extraResolvers = {};
 
 export const resolvers = { queries, mutations, extraResolvers };
