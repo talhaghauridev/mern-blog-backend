@@ -1,17 +1,16 @@
 import { ErrorTypes } from "../../constants/ErrorTypes";
+import Blog from "../../models/blog.model";
 import User from "../../models/user.model";
 import ApolloError from "../../utils/ApolloError";
 import { removeFromCloudinary, uploadCloudinary } from "../../utils/cloudinary";
 import { Context, verifyUser } from "../../utils/context";
+import { isBase64Image, validateSocialLinks } from "../../utils/utils";
 import {
-  isBase64Image,
-  isHttpsUrl,
-  validateSocialLinks,
-} from "../../utils/utils";
-import {
+  BlogCount,
+  GetUserBlogs,
   SearchUsers,
   UpdateProfile,
-  UploadPrfileImage,
+  UploadProfileImage,
   UserProfileInput,
 } from "./interfaces";
 
@@ -28,11 +27,53 @@ const queries = {
       })
         .limit(limit)
         .select(
-          "profile_info.username profile_info.fullName profile_info.profileImage profile_info.bio profile_info.social_links"
+          "profile_info.username profile_info.fullName profile_info.profileImage profile_info.bio social_links"
         );
-      return users;
-    } catch (error) {
-      return ApolloError(`Find Users Error: ${error}`, ErrorTypes.BAD_REQUEST);
+
+      return users.map((user) => {
+        const { profile_info, social_links, _id } = user.toObject();
+        return {
+          ...profile_info,
+          social_links,
+          _id,
+        };
+      });
+    } catch (error: any) {
+      return ApolloError(
+        `Find Users Error: ${error.message}`,
+        ErrorTypes.BAD_REQUEST
+      );
+    }
+  },
+  getUserBlogs: async (_: any, { input }: GetUserBlogs, ctx: Context) => {
+    const user = await verifyUser(ctx);
+    const { page = 1, draft, query, limit = 5, deletedDocCount } = input;
+    let skip = (page - 1) * limit;
+    if (deletedDocCount) {
+      skip -= deletedDocCount;
+    }
+    try {
+      const blogs = await Blog.find({
+        author: user._id,
+        draft,
+        title: new RegExp(query, "i"),
+      })
+        .skip(skip)
+        .limit(limit)
+        .select("-draft -_id");
+
+      const blogCount = await Blog.countDocuments({
+        author: user._id,
+        draft,
+        title: new RegExp(query, "i"),
+      });
+
+      return { blogs: "Hello World" };
+    } catch (error: any) {
+      return ApolloError(
+        `Get User Blogs Error: ${error.message}`,
+        ErrorTypes.BAD_REQUEST
+      );
     }
   },
 };
@@ -40,7 +81,10 @@ const queries = {
 const mutations = {
   userProfile: async (_: any, { username }: UserProfileInput) => {
     if (!username) {
-      return ApolloError("Please Provide username", ErrorTypes.BAD_USER_INPUT);
+      return ApolloError(
+        "Please provide a username",
+        ErrorTypes.BAD_USER_INPUT
+      );
     }
 
     const user = await User.findOne({
@@ -54,7 +98,7 @@ const mutations = {
   },
   uploadProfileImage: async (
     _: any,
-    { file }: UploadPrfileImage,
+    { file }: UploadProfileImage,
     ctx: Context
   ) => {
     const user = await verifyUser(ctx);
@@ -62,7 +106,7 @@ const mutations = {
       return ApolloError("No file provided", ErrorTypes.BAD_USER_INPUT);
     }
     if (!isBase64Image(file)) {
-      return ApolloError("Invalid File", ErrorTypes.BAD_USER_INPUT);
+      return ApolloError("Invalid file", ErrorTypes.BAD_USER_INPUT);
     }
 
     const { profileImage } = user.profile_info;
@@ -80,7 +124,6 @@ const mutations = {
     await user.save({ validateBeforeSave: false });
     return response.secure_url;
   },
-
   updateProfile: async (_: any, { input }: UpdateProfile, ctx: Context) => {
     const user = await verifyUser(ctx);
     const { username, bio, social_links } = input;
@@ -118,11 +161,31 @@ const mutations = {
 
     user.profile_info.bio = bio;
     user.profile_info.username = username;
-    user.save({ validateBeforeSave: false });
+    await user.save({ validateBeforeSave: false });
     return "Profile updated successfully";
   },
 };
 
-const extraResolvers = {};
+const extraResolvers = {
+  UserBlogsResult: {
+    blogCount: async (
+      _: any,
+      { input }: BlogCount,
+      ctx: Context,
+      info: string
+    ) => {
+      const user = await verifyUser(ctx);
+      console.log(info);
+
+      const { draft, query } = input;
+      const blogsCount = await Blog.countDocuments({
+        author: user._id,
+        draft,
+        title: new RegExp(query, "i"),
+      });
+      return blogsCount;
+    },
+  },
+};
 
 export const resolvers = { queries, mutations, extraResolvers };

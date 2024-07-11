@@ -5,7 +5,7 @@ type UserProfileInput = {
   username: string;
 };
 
-type UploadPrfileImage = {
+type UploadProfileImage = {
   file: string;
 };
 
@@ -21,4 +21,25 @@ type SearchUsers = {
   };
 };
 
-export { UpdateProfile, UploadPrfileImage, UserProfileInput, SearchUsers };
+type GetUserBlogs = {
+  input: {
+    draft: boolean;
+    deletedDocCount: number;
+    page: number;
+  } & SearchUsers["input"];
+};
+
+type BlogCount = {
+  input: {
+    query: string;
+    draft: boolean;
+  };
+};
+export {
+  UpdateProfile,
+  UploadProfileImage,
+  UserProfileInput,
+  SearchUsers,
+  GetUserBlogs,
+  BlogCount,
+};

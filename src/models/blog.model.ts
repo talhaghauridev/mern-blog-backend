@@ -34,16 +34,20 @@ const blogSchema = new Schema<IBlog>(
     },
     banner: {
       type: String,
+      required: true,
     },
     des: {
       type: String,
       maxlength: 200,
+      required: true,
     },
     content: {
       type: [Schema.Types.Mixed] as any,
+      required: true,
     },
     tags: {
       type: [String],
+      required: true,
     },
     author: {
       type: Schema.Types.ObjectId,

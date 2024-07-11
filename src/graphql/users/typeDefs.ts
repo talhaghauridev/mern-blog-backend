@@ -4,9 +4,11 @@ const typeDefs = gql`
   scalar Date
   type Query {
     getMyProfile: User!
-    searchUsers(input: SearchUsersInput!): SearchUsersResponse!
+    searchUsers(input: SearchUsersInput!): [SearchUsersResponse]!
+    getUserBlogs(input: GetUserBlogsInput!): UserBlogsResult!
   }
 
+  # Types
   type SearchUsersResponse {
     fullName: String!
     username: String!
@@ -24,6 +26,26 @@ const typeDefs = gql`
     joinedAt: Date!
   }
 
+  type UserBlogsResult {
+    blogs: String
+    blogCount: Int!
+  }
+
+  #  Mutations
+  type Mutation {
+    userProfile(username: String!): UserProfileResponse!
+    uploadProfileImage(file: String!): String!
+    updateProfile(input: UpdateProfileInput): String!
+  }
+
+  # Inputs
+  input GetUserBlogsInput {
+    query: String!
+    page: Int!
+    draft: Boolean!
+    deletedDocCount: Int
+    limit: Int
+  }
   input SearchUsersInput {
     query: String!
     limit: Int
@@ -42,12 +64,6 @@ const typeDefs = gql`
     twitter: String
     github: String
     website: String
-  }
-
-  type Mutation {
-    userProfile(username: String!): UserProfileResponse!
-    uploadProfileImage(file: String!): String!
-    updateProfile(input: UpdateProfileInput): String!
   }
 `;
 

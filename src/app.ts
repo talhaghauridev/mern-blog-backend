@@ -18,9 +18,9 @@ app.use(compression(config.compression));
 app.use(useragent.express());
 app.use(morgan("dev"));
 
-app.get("/", async (req: any, res) => {
+app.get("/", async (req, res) => {
   res.status(200).json({
-    message: "Server is running perfectly",
+    message: "Server is running fine 🚀🚀",
   });
 });
 
