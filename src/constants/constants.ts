@@ -3,6 +3,14 @@ export const UserRolesEnum = {
   USER: "USER",
 };
 
+export const UserNotificationEnum = {
+  LIKE: "like",
+  COMMENT: "comment",
+  REPLY: "reply",
+};
+
+export const AvailableUserNotifications = Object.values(UserNotificationEnum);
+
 export const AvailableUserRoles = Object.values(UserRolesEnum);
 
 export const UserLoginType = {

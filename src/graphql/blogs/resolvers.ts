@@ -130,34 +130,33 @@ const queries = {
     }
 
     try {
-      const blogQuery = Blog.findOneAndUpdate(
+      const blog = await Blog.findOneAndUpdate(
         { blog_id },
         { $inc: { "activity.total_reads": 1 } }
-      );
-      if (fields.includes("author")) {
-        blogQuery.populate({
-          path: "author",
-          model: "User",
-          select:
-            "profile_info.profileImage profile_info.username profile_info.email profile_info.fullName joinedAt social_links account_info",
-        });
+      ).populate({
+        path: "author",
+        model: "User",
+        select:
+          "profile_info.profileImage profile_info.username profile_info.email profile_info.fullName joinedAt social_links account_info",
+      });
 
-        const blog = await blogQuery.exec();
-        if (!blog) {
-          return ApolloError("Blog not found", ErrorTypes.NOT_FOUND);
-        }
-
-        await User.findOneAndUpdate(
-          {
-            "profile_info.username": (blog.author as UserType).profile_info
-              .username,
-          },
-          {
-            $inc: { "account_info.total_reads": 1 },
-          }
-        );
+      if (!blog) {
+        return ApolloError("Blog not found", ErrorTypes.NOT_FOUND);
       }
-    } catch (error) {}
+
+      await User.findOneAndUpdate(
+        {
+          "profile_info.username": (blog.author as UserType).profile_info
+            .username,
+        },
+        {
+          $inc: { "account_info.total_reads": 1 },
+        }
+      );
+      return blog;
+    } catch (error: any) {
+      return ApolloError(error.message, ErrorTypes.INTERNAL_SERVER_ERROR);
+    }
   },
 };
 

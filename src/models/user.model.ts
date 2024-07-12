@@ -6,14 +6,15 @@ import {
   AvailableUserRoles,
   UserLoginType,
   UserRolesEnum,
-} from "../constants/constants";
+} from "@/constants/constants";
 import {
   ACCESS_TOKEN_EXPIRY,
   ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_EXPIRY,
   REFRESH_TOKEN_SECRET,
-} from "../constants/env";
-import { UserType } from "../types";
+} from "@/constants/env";
+import { UserType } from "@/types";
+import { models } from "mongoose";
 
 export interface IUser extends UserType, Document {
   isPasswordCorrect(enteredPassword: string): Promise<boolean>;
@@ -161,6 +162,6 @@ userSchema.methods.generateRefreshToken = function () {
   return refreshToken;
 };
 
-const User: Model<IUser> = model("User", userSchema);
+const User: Model<IUser> = models?.User || model("User", userSchema);
 
 export default User;

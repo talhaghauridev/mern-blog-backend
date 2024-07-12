@@ -1,5 +1,5 @@
 import { UserType } from "@/types";
-import mongoose, { Document, Model, model, Schema } from "mongoose";
+import mongoose, { Document, Model, model, models, Schema } from "mongoose";
 
 export interface IBlog extends Document {
   blog_id: string;
@@ -101,6 +101,6 @@ blogSchema.pre("save", function (next) {
   next();
 });
 
-const Blog: Model<IBlog> = model("Blog", blogSchema);
+const Blog: Model<IBlog> = models.Blog || model("Blog", blogSchema);
 
 export default Blog;
