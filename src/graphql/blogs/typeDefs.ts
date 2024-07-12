@@ -5,7 +5,9 @@ const typeDefs = gql`
 
   type Query {
     latestBlogs(input: LatestBlogsInput): LatestBlogResult!
+    searchBlogs(input: SearchBlogInput): LatestBlogResult!
     trendingBlogs: [Blog]!
+    getBlog(blog_id: String!): Blog!
   }
 
   type LatestBlogResult {
@@ -38,12 +40,21 @@ const typeDefs = gql`
     comments: [String]!
     draft: Boolean!
     publishedAt: Date!
-    createdAt: Date!
     updatedAt: Date!
   }
 
   type Mutation {
     createBlog(input: CreateBlogInput!): String!
+    createDraftBlog(input: CreateBlogInput): String!
+  }
+
+  input SearchBlogInput {
+    tag: String
+    query: String
+    author: String
+    page: Int
+    limit: Int
+    blogId: String!
   }
 
   input LatestBlogsInput {
@@ -52,12 +63,12 @@ const typeDefs = gql`
   }
 
   input CreateBlogInput {
+    id: ID
     title: String
     banner: String
     des: String
     content: [String]!
     tags: [String]!
-    draft: Boolean!
   }
 `;
 

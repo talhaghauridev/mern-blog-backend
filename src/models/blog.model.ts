@@ -1,3 +1,4 @@
+import { UserType } from "@/types";
 import mongoose, { Document, Model, model, Schema } from "mongoose";
 
 export interface IBlog extends Document {
@@ -7,7 +8,7 @@ export interface IBlog extends Document {
   des?: string;
   content: any[];
   tags?: string[];
-  author: mongoose.Types.ObjectId;
+  author: mongoose.Types.ObjectId | UserType;
   activity: {
     total_likes: number;
     total_comments: number;
@@ -16,8 +17,7 @@ export interface IBlog extends Document {
   };
   comments?: mongoose.Types.ObjectId[];
   draft: boolean;
-  publishedAt: Date;
-  createdAt: Date;
+  publishedAt: Date | null;
   updatedAt: Date;
 }
 
@@ -80,14 +80,26 @@ const blogSchema = new Schema<IBlog>(
       type: Boolean,
       default: false,
     },
+    publishedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: {
-      createdAt: "publishedAt",
       updatedAt: true,
     },
   }
 );
+
+blogSchema.pre("save", function (next) {
+  if (this.isNew && !this.draft) {
+    this.publishedAt = new Date();
+  } else if (this.draft) {
+    this.publishedAt = null;
+  }
+  next();
+});
 
 const Blog: Model<IBlog> = model("Blog", blogSchema);
 

@@ -1,7 +1,7 @@
 import { IBlog } from "@/models/blog.model";
 
 type CreateBlog = {
-  input: Pick<IBlog, "title" | "des" | "banner" | "content" | "tags">;
+  input: Pick<IBlog, "title" | "des" | "banner" | "content" | "tags" | "id">;
 };
 
 type AddDraft = {
@@ -17,4 +17,19 @@ type LatestBlog = {
   };
 };
 
-export type { CreateBlog, AddDraft, LatestBlog };
+type SearchBlogs = {
+  input: {
+    page: number;
+    limit: number;
+    query: string;
+    blogId: string;
+    tag: string;
+    author: string;
+  };
+};
+
+type GetBlog = {
+  blog_id: string;
+};
+
+export type { CreateBlog, AddDraft, LatestBlog, SearchBlogs, GetBlog };
