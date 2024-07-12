@@ -1,7 +1,13 @@
-import { IBlog } from "../../models/blog.model";
+import { IBlog } from "@/models/blog.model";
 
 type CreateBlog = {
   input: Pick<IBlog, "title" | "des" | "banner" | "content" | "tags">;
 };
 
-export type { CreateBlog };
+type AddDraft = {
+  input: Required<
+    Pick<IBlog, "title" | "des" | "banner" | "content" | "tags" | "id">
+  >;
+};
+
+export type { CreateBlog, AddDraft };

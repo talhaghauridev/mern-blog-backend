@@ -27,7 +27,7 @@ const typeDefs = gql`
   }
 
   type UserBlogsResult {
-    blogs: String!
+    blogs: [Blog]!
     count: Int!
   }
 

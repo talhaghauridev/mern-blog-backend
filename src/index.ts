@@ -1,9 +1,10 @@
+import "module-alias/register";
+import createApolloGraphqlServer from "@/graphql";
 import { expressMiddleware } from "@apollo/server/express4";
-import app from "./app";
-import { ENV_MODE, PORT } from "./constants/env";
-import connectDB from "./db";
-import createApolloGraphqlServer from "./graphql";
-import { context } from "./utils/context";
+import { ENV_MODE, PORT } from "@/constants/env";
+import app from "@/app";
+import { context } from "@/utils/context";
+import connectDB from "@/db";
 
 const init = async () => {
   const server = await createApolloGraphqlServer();
@@ -11,10 +12,9 @@ const init = async () => {
   app.use(
     "/graphql",
     expressMiddleware(server, {
-      context,
+      context: context,
     })
   );
-
   app.listen(PORT, () =>
     console.log(
       `Server is running in http://localhost:${PORT} in ${ENV_MODE} Mode `

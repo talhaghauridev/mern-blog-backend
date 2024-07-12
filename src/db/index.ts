@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { DB_NAME, MONGODB_URI } from "../constants/env";
+import { DB_NAME, MONGODB_URI } from "@/constants/env";
 
 const connectDB = async (): Promise<void> => {
   try {

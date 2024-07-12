@@ -1,7 +1,6 @@
-import jwt from "jsonwebtoken";
+import { IUser } from "@/models/user.model";
+import UserService from "@/services/user.services";
 import ApiError from "./ApiError";
-import UserService from "../services/user.services";
-import { IUser } from "../models/user.model";
 
 const generateAccessAndRefreshTokens = async (userId: string) => {
   try {

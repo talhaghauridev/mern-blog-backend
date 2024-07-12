@@ -1,14 +1,14 @@
 import jwt from "jsonwebtoken";
-import { UserLoginType } from "../../constants/constants";
-import { REFRESH_TOKEN_SECRET } from "../../constants/env";
-import { ErrorTypes } from "../../constants/ErrorTypes";
-import User from "../../models/user.model";
-import UserService from "../../services/user.services";
-import ApolloError from "../../utils/ApolloError";
-import { Context, verifyUser } from "../../utils/context";
-import { generateAccessAndRefreshTokens } from "../../utils/generateToken";
-import getGoogleProfile from "../../utils/getGoogleProfile";
-import { EMAIL_REGEX, PASSWORD_REGEX } from "../../utils/utils";
+import { UserLoginType } from "@/constants/constants";
+import { REFRESH_TOKEN_SECRET } from "@/constants/env";
+import { ErrorTypes } from "@/constants/ErrorTypes";
+import User from "@/models/user.model";
+import UserService from "@/services/user.services";
+import ApolloError from "@/utils/ApolloError";
+import { Context, verifyUser } from "@/utils/context";
+import { generateAccessAndRefreshTokens } from "@/utils/generateToken";
+import getGoogleProfile from "@/utils/getGoogleProfile";
+import { EMAIL_REGEX, PASSWORD_REGEX } from "@/utils/utils";
 import {
   ChangePasswordInput,
   LoginInput,

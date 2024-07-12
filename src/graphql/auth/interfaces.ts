@@ -1,4 +1,4 @@
-import { UserType } from "../../types";
+import { UserType } from "@/types";
 
 type LoginInput = {
   input: { email: string; password: string };

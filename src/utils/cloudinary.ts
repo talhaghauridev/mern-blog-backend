@@ -1,7 +1,7 @@
 import { UploadApiResponse, v2 } from "cloudinary";
-import { config } from "../config";
-import { ErrorTypes } from "../constants/ErrorTypes";
+import { config } from "@/config";
 import ApolloError from "./ApolloError";
+import { ErrorTypes } from "@/constants/ErrorTypes";
 
 v2.config(config.cloudinary);
 

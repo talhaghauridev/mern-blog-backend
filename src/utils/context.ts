@@ -1,10 +1,10 @@
+import { ExpressContextFunctionArgument } from "@apollo/server/express4";
 import jwt from "jsonwebtoken";
-import { ExpressContextFunctionArgument } from "@apollo/server/dist/esm//express4";
 import ApolloError from "./ApolloError";
-import { ErrorTypes } from "../constants/ErrorTypes";
-import { ACCESS_TOKEN_SECRET } from "../constants/env";
-import UserService from "../services/user.services";
-import { IUser } from "../models/user.model";
+import { ErrorTypes } from "@/constants/ErrorTypes";
+import { ACCESS_TOKEN_SECRET } from "@/constants/env";
+import UserService from "@/services/user.services";
+import { IUser } from "@/models/user.model";
 
 export type Context = ExpressContextFunctionArgument & {
   token: string;

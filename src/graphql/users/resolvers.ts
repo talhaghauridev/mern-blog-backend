@@ -1,14 +1,14 @@
-import { ErrorTypes } from "../../constants/ErrorTypes";
-import Blog from "../../models/blog.model";
-import User from "../../models/user.model";
-import ApolloError from "../../utils/ApolloError";
-import { removeFromCloudinary, uploadCloudinary } from "../../utils/cloudinary";
-import { Context, verifyUser } from "../../utils/context";
+import ApolloError from "@/utils/ApolloError";
+import { ErrorTypes } from "@/constants/ErrorTypes";
+import Blog from "@/models/blog.model";
+import User from "@/models/user.model";
+import { removeFromCloudinary, uploadCloudinary } from "@/utils/cloudinary";
+import { Context, verifyUser } from "@/utils/context";
 import {
   extractFields,
   isBase64Image,
   validateSocialLinks,
-} from "../../utils/utils";
+} from "@/utils/utils";
 import {
   GetUserBlogs,
   SearchUsers,
@@ -72,17 +72,15 @@ const queries = {
         .select("-draft -_id");
 
       if (fields.includes("count")) {
-        console.log("Hello", fields);
-
         const count = await Blog.countDocuments({
           author: user._id,
           draft,
           title: new RegExp(query, "i"),
         });
-        return { blogs: "Hello World", count };
+        return { blogs, count };
       }
 
-      return { blogs: "Hello World" };
+      return { blogs };
     } catch (error: any) {
       return ApolloError(
         `Get User Blogs Error: ${error.message}`,

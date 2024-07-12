@@ -1,5 +1,5 @@
-import { IUser } from "../../models/user.model";
-import { UserType } from "../../types";
+import { IUser } from "@/models/user.model";
+import { UserType } from "@/types";
 
 type UserProfileInput = {
   username: string;

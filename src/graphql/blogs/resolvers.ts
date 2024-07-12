@@ -1,10 +1,10 @@
-import { ErrorTypes } from "../../constants/ErrorTypes";
-import Blog from "../../models/blog.model";
-import User from "../../models/user.model";
-import ApolloError from "../../utils/ApolloError";
-import { Context, verifyUser } from "../../utils/context";
-import { CreateBlog } from "./interfaces";
-
+import { ErrorTypes } from "@/constants/ErrorTypes";
+import Blog from "@/models/blog.model";
+import User from "@/models/user.model";
+import ApolloError from "@/utils/ApolloError";
+import { Context, verifyUser } from "@/utils/context";
+import { AddDraft, CreateBlog } from "./interfaces";
+import { v4 as uuidv4 } from "uuid";
 const queries = {
   hello: () => {
     return "Hello World";
@@ -25,7 +25,15 @@ const mutations = {
         ErrorTypes.BAD_USER_INPUT
       );
     }
+    const blog_id =
+      title
+        .replace(/[^a-zA-Z0-9]/g, " ")
+        .replace(/\s+/g, "-")
+        .toLowerCase()
+        .trim() + uuidv4();
+
     const blog = await Blog.create({
+      blog_id,
       title,
       des,
       content,
@@ -38,14 +46,22 @@ const mutations = {
     if (!blog) {
       return ApolloError(`Creating Blog Error`, ErrorTypes.BAD_REQUEST);
     }
-    await User.findByIdAndUpdate(user._id, {
-      $inc: { "account_info.total_posts": 1 },
-      $push: { blogs: blog._id },
-    });
+    await User.findOneAndUpdate(
+      { _id: user._id },
+      {
+        $inc: { "account_info.total_posts": 1 },
+        $push: { blogs: blog._id },
+      }
+    );
     return "Blog created successfully";
   },
-  // addDraft: async (_: any, { input }: CreateBlog, ctx: Context) => {
+
+  // addDraft: async (_: any, { input }: AddDraft, ctx: Context) => {
   //   const user = verifyUser(ctx);
+  //   const { title, des, content, tags, banner, id } = input;
+  //   if (!id) {
+  //     return ApolloError("Id is required", ErrorTypes.VALIDATION_ERROR);
+  //   }
   // },
 };
 

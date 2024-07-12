@@ -1,16 +1,14 @@
+import { ConfigOptions } from "cloudinary";
+import compressionMiddleware from "compression";
 import { CorsOptions } from "cors";
 import { DotenvConfigOptions } from "dotenv";
+import { HelmetOptions } from "helmet";
 import {
   CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET,
   CLOUDINARY_NAME,
   FRONTEND_URI,
-  SESSION_SECRET,
 } from "../constants/env";
-import { ConfigOptions } from "cloudinary";
-import compressionMiddleware from "compression";
-import { SessionOptions } from "express-session";
-import { HelmetOptions } from "helmet";
 const cors: CorsOptions = {
   credentials: true,
   origin: [FRONTEND_URI, "*"],
@@ -36,15 +34,6 @@ const compression: compressionMiddleware.CompressionOptions = {
   },
 };
 
-const session: SessionOptions = {
-  secret: SESSION_SECRET,
-  resave: false,
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 24,
-  },
-  saveUninitialized: false,
-};
-
 const helmet: HelmetOptions = {
   contentSecurityPolicy: false,
 };
@@ -53,6 +42,5 @@ export const config = {
   dotenv,
   cloudinary,
   compression,
-  session,
   helmet,
 };
