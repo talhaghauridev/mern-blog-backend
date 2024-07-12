@@ -10,4 +10,11 @@ type AddDraft = {
   >;
 };
 
-export type { CreateBlog, AddDraft };
+type LatestBlog = {
+  input: {
+    page: number;
+    limit: number;
+  };
+};
+
+export type { CreateBlog, AddDraft, LatestBlog };

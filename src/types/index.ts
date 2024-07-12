@@ -1,3 +1,4 @@
+import { GraphQLResolveInfo } from "graphql";
 import { Schema } from "mongoose";
 
 type UserType = {
@@ -30,4 +31,6 @@ type UserType = {
   blogs: Schema.Types.ObjectId[];
 };
 
-export { UserType };
+type Info = GraphQLResolveInfo;
+
+export type { UserType, Info };

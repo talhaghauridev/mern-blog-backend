@@ -3,11 +3,72 @@ import Blog from "@/models/blog.model";
 import User from "@/models/user.model";
 import ApolloError from "@/utils/ApolloError";
 import { Context, verifyUser } from "@/utils/context";
-import { AddDraft, CreateBlog } from "./interfaces";
+import { AddDraft, CreateBlog, LatestBlog } from "./interfaces";
 import { v4 as uuidv4 } from "uuid";
+import { extractFields } from "@/utils/utils";
+import { Info } from "@/types";
+
 const queries = {
-  hello: () => {
-    return "Hello World";
+  latestBlogs: async (_: any, { input }: LatestBlog, __: any, info: Info) => {
+    const fields = extractFields(info);
+
+    const { page = 1, limit = 5 } = input;
+    const skip = (page - 1) * limit;
+
+    try {
+      const blogQuery = Blog.find({ draft: false });
+      if (fields.some((i) => i.startsWith("blogs.author"))) {
+        blogQuery.populate({
+          path: "author",
+          model: "User",
+          select:
+            "profile_info.profileImage profile_info.username profile_info.email profile_info.fullName joinedAt social_links account_info",
+        });
+      }
+
+      const blogs = await blogQuery
+        .sort({ publishedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .exec();
+      console.log(fields);
+
+      if (fields.includes("count")) {
+        const count = await Blog.countDocuments({ draft: false });
+        return { count, blogs };
+      }
+
+      return { blogs };
+    } catch (error: any) {
+      return ApolloError(error.message, ErrorTypes.INTERNAL_SERVER_ERROR);
+    }
+  },
+  trendingBlogs: async (_: any, __: any, ___: any, info: Info) => {
+    const fields = extractFields(info);
+    try {
+      const blogQuery = Blog.find({ draft: false });
+      if (fields.some((i) => i.startsWith("author"))) {
+        blogQuery.populate({
+          path: "author",
+          model: "User",
+          select:
+            "profile_info.profileImage profile_info.username profile_info.email profile_info.fullName joinedAt social_links account_info",
+        });
+      }
+
+      const blogs = await blogQuery
+        .sort({
+          "activity.total_reads": -1,
+          "activity.total_likes": -1,
+          publishedAt: -1,
+        })
+        .limit(5)
+        .exec();
+
+      return blogs;
+    } catch (error: any) {
+      return ApolloError(error.message, ErrorTypes.INTERNAL_SERVER_ERROR);
+    }
   },
 };
 
