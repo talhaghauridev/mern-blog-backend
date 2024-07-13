@@ -32,4 +32,21 @@ type GetBlog = {
   blog_id: string;
 };
 
-export type { CreateBlog, AddDraft, LatestBlog, SearchBlogs, GetBlog };
+type LikeBlog = {
+  blogId: string;
+  isUserLiked: boolean;
+};
+
+type UserLiked = {
+  blogId: string;
+};
+
+export type {
+  AddDraft,
+  CreateBlog,
+  GetBlog,
+  LatestBlog,
+  LikeBlog,
+  SearchBlogs,
+  UserLiked,
+};

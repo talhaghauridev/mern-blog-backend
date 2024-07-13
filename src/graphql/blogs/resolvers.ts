@@ -3,18 +3,22 @@ import Blog, { IBlog } from "@/models/blog.model";
 import User from "@/models/user.model";
 import ApolloError from "@/utils/ApolloError";
 import { Context, verifyUser } from "@/utils/context";
+import { v4 as uuidv4 } from "uuid";
+import { extractFields, findInfoField } from "@/utils/utils";
+import { Info, UserType } from "@/types";
+import { FilterQuery } from "mongoose";
+import Notification from "@/models/notification.model";
+import { UserNotificationEnum } from "@/constants/constants";
+import Comment from "@/models/comment.model";
 import {
   AddDraft,
   CreateBlog,
   GetBlog,
   LatestBlog,
+  LikeBlog,
   SearchBlogs,
+  UserLiked,
 } from "./interfaces";
-import { v4 as uuidv4 } from "uuid";
-import { extractFields } from "@/utils/utils";
-import { Info, UserType } from "@/types";
-import { FilterQuery } from "mongoose";
-
 const queries = {
   latestBlogs: async (_: any, { input }: LatestBlog, __: any, info: Info) => {
     const fields = extractFields(info);
@@ -97,7 +101,7 @@ const queries = {
 
     try {
       const blogQuery = Blog.find(findQuery);
-      if (fields.some((i) => i.startsWith("blogs.author"))) {
+      if (findInfoField(fields, "blogs.author")) {
         blogQuery.populate({
           path: "author",
           model: "User",
@@ -218,7 +222,7 @@ const mutations = {
 
   createDraftBlog: async (_: any, { input }: AddDraft, ctx: Context) => {
     const user = await verifyUser(ctx);
-    const { title, des, content, tags, banner } = input;
+    const { title } = input;
     if (!title) {
       return ApolloError(
         "You must provide a title to publish the blog",
@@ -232,22 +236,89 @@ const mutations = {
         .toLowerCase()
         .trim() + uuidv4();
     try {
-      const blog = await Blog.create(
-        {
-          blog_id,
-          title,
-          des,
-          content,
-          tags,
-          banner,
-          draft: true,
-          author: user._id,
-        },
-        { validateBeforeSave: false }
-      );
+      const blog = new Blog({
+        ...input,
+        title,
+        blog_id,
+        draft: true,
+        author: user._id,
+      });
+      await blog.save({ validateBeforeSave: false });
       if (!blog) {
         return ApolloError("Draft blog create error", ErrorTypes.BAD_REQUEST);
       }
+      return "Draft blog created successfully";
+    } catch (error: any) {
+      return ApolloError(error.message, ErrorTypes.INTERNAL_SERVER_ERROR);
+    }
+  },
+
+  likeBlog: async (_: any, { blogId, isUserLiked }: LikeBlog, ctx: Context) => {
+    const user = await verifyUser(ctx);
+    if (!blogId) {
+      return ApolloError("Please provide a blog id", ErrorTypes.BAD_USER_INPUT);
+    }
+    const incrementValue = isUserLiked ? 1 : -1;
+
+    try {
+      const blog = await Blog.findOneAndUpdate(
+        { _id: blogId },
+        { $inc: { "activity.total_likes": incrementValue } }
+      );
+
+      if (isUserLiked) {
+        await Notification.create({
+          type: UserNotificationEnum.LIKE,
+          blog: blogId,
+          notification_for: blog?.author,
+          user: user._id,
+        });
+        return true;
+      } else {
+        await Notification.findOneAndDelete({
+          user: user._id,
+          blog: blogId,
+          type: UserNotificationEnum.LIKE,
+        });
+        return false;
+      }
+    } catch (error: any) {
+      return ApolloError(error.message, ErrorTypes.INTERNAL_SERVER_ERROR);
+    }
+  },
+  isUserLiked: async (_: any, { blogId }: UserLiked, ctx: Context) => {
+    const user = await verifyUser(ctx);
+    try {
+      const notification = await Notification.exists({
+        user: user._id,
+        type: UserNotificationEnum.LIKE,
+        blog: blogId,
+      });
+
+      return notification ? true : false;
+    } catch (error: any) {
+      return ApolloError(error.message, ErrorTypes.BAD_REQUEST);
+    }
+  },
+  deleteBlog: async (_: any, { blogId }: UserLiked, ctx: Context) => {
+    const user = await verifyUser(ctx);
+
+    try {
+      await Blog.findOneAndDelete({ _id: blogId });
+
+      await Promise.all([
+        Notification.deleteMany({ blog: blogId }),
+        Comment.deleteMany({ blog_id: blogId }),
+      ]);
+
+      await User.findOneAndUpdate(
+        { _id: blogId },
+        {
+          $pull: { blogs: blogId },
+          $inc: { "account_info.total_posts": -1 },
+        }
+      );
+      return "Blog Deleted Successfully";
     } catch (error: any) {
       return ApolloError(error.message, ErrorTypes.INTERNAL_SERVER_ERROR);
     }

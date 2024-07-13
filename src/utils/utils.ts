@@ -74,7 +74,9 @@ const isHttpsUrl = (url: string) => {
     return false;
   }
 };
-
+const findInfoField = (fields: any, key: string) => {
+  return fields.some((i: any) => i.startsWith(key));
+};
 const extractFields = (info: any, parentPath = ""): string[] => {
   let fields: string[] = [];
   if (!info?.fieldNodes?.[0]?.selectionSet?.selections) {
@@ -99,6 +101,21 @@ const extractFields = (info: any, parentPath = ""): string[] => {
 
   return fields;
 };
+interface UnionResolverConfig {
+  typeName: string;
+  objectTypeMappings: { [key: string]: string };
+}
+const resolveUnionType = (config: UnionResolverConfig) => ({
+  __resolveType(obj: any) {
+    for (const [key, value] of Object.entries(config.objectTypeMappings)) {
+      if (obj[key]) {
+        return value;
+      }
+    }
+    return null;
+  },
+});
+
 export {
   EMAIL_REGEX,
   isHttpsUrl,
@@ -107,4 +124,6 @@ export {
   validateSocialLinks,
   isBase64Image,
   extractFields,
+  resolveUnionType,
+  findInfoField,
 };

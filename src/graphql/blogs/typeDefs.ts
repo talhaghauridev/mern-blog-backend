@@ -29,6 +29,7 @@ const typeDefs = gql`
   }
 
   type Blog {
+    _id: ID!
     blog_id: String
     title: String
     banner: String
@@ -46,6 +47,9 @@ const typeDefs = gql`
   type Mutation {
     createBlog(input: CreateBlogInput!): String!
     createDraftBlog(input: CreateBlogInput): String!
+    likeBlog(blogId: String!, isUserLiked: Boolean!): Boolean!
+    isUserLiked(blogId: String!): Boolean!
+    deleteBlog(blogId: String!): String!
   }
 
   input SearchBlogInput {
@@ -64,11 +68,11 @@ const typeDefs = gql`
 
   input CreateBlogInput {
     id: ID
-    title: String
+    title: String!
     banner: String
     des: String
-    content: [String]!
-    tags: [String]!
+    content: [String]
+    tags: [String]
   }
 `;
 

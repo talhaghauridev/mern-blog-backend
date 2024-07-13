@@ -35,6 +35,13 @@ type BlogCount = {
     draft: boolean;
   };
 };
+
+type ChangePasswordInput = {
+  input: {
+    oldPassword: string;
+    newPassword: string;
+  };
+};
 export {
   UpdateProfile,
   UploadProfileImage,
@@ -42,4 +49,5 @@ export {
   SearchUsers,
   GetUserBlogs,
   BlogCount,
+  ChangePasswordInput,
 };

@@ -1,8 +1,10 @@
 import { AvailableUserNotifications } from "@/constants/constants";
-import { Schema, model, Document, Model, models } from "mongoose";
+import { Document, Model, Schema, model, models } from "mongoose";
 
-interface INotification extends Document {
-  type: "like" | "comment" | "reply";
+export type NotificationType = "like" | "comment" | "reply";
+
+export interface INotification extends Document {
+  type: NotificationType;
   blog: Schema.Types.ObjectId;
   notification_for: Schema.Types.ObjectId;
   user: Schema.Types.ObjectId;

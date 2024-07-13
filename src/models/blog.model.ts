@@ -1,5 +1,6 @@
-import { UserType } from "@/types";
 import mongoose, { Document, Model, model, models, Schema } from "mongoose";
+import { UserType } from "@/types";
+import { IComment } from "./comment.model";
 
 export interface IBlog extends Document {
   blog_id: string;
@@ -15,7 +16,7 @@ export interface IBlog extends Document {
     total_reads: number;
     total_parent_comments: number;
   };
-  comments?: mongoose.Types.ObjectId[];
+  comments?: mongoose.Types.ObjectId[] | IComment;
   draft: boolean;
   publishedAt: Date | null;
   updatedAt: Date;
