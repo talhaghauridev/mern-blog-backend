@@ -53,24 +53,24 @@ const queries = {
     try {
       const notificationQuery = Notification.find(findQuery);
 
-      if (findInfoField(fields, "blog")) {
+      if (findInfoField(fields, "notifications.blog")) {
         notificationQuery.populate(
           "blog",
           "_id blog_id title banner des publishedAt "
         );
-      } else if (findInfoField(fields, "user")) {
+      } else if (findInfoField(fields, "notifications.user")) {
         notificationQuery.populate(
           "user",
           "profile_info.profileImage profile_info.username profile_info.email profile_info.fullName joinedAt social_links account_info"
         );
-      } else if (findInfoField(fields, "reply")) {
+      } else if (findInfoField(fields, "notifications.reply")) {
         notificationQuery.populate("reply", "_id comment isReply commentedAt");
-      } else if (findInfoField(fields, "comment")) {
+      } else if (findInfoField(fields, "notifications.comment")) {
         notificationQuery.populate(
           "comment",
           "_id comment isReply commentedAt"
         );
-      } else if (findInfoField(fields, "replied_on_comment")) {
+      } else if (findInfoField(fields, "notifications.replied_on_comment")) {
         notificationQuery.populate(
           "replied_on_comment",
           "_id comment isReply commentedAt"
