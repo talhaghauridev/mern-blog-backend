@@ -19,6 +19,14 @@ import {
   SearchBlogs,
   UserLiked,
 } from "./interfaces";
+
+export const authFunction = (resolver: any) => {
+  return async (parent: any, args: any, context: Context, info: Info) => {
+    const user = await verifyUser(context);
+    return resolver(parent, args, user, info);
+  };
+};
+
 const queries = {
   latestBlogs: async (_: any, { input }: LatestBlog, __: any, info: Info) => {
     const fields = extractFields(info);

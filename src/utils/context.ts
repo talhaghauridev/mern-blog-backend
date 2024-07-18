@@ -22,10 +22,13 @@ const context = async ({ req, res }: ExpressContextFunctionArgument) => {
 
 const cacheUser = new Map<string, IUser>();
 
-const verifyUser = async ({ token }: Context): Promise<IUser> => {
-  if (!token) {
+const verifyUser = async ({ token: authHeader }: Context): Promise<IUser> => {
+  if (!authHeader) {
     return ApolloError("Token is required", ErrorTypes.BAD_USER_INPUT);
   }
+  const token = authHeader.replace("Bearer ", "");
+  console.log({ authHeader, token });
+
   let decoded;
   try {
     decoded = jwt.verify(token, ACCESS_TOKEN_SECRET) as { id: string };

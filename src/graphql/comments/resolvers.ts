@@ -6,11 +6,7 @@ import Comment, { IComment } from "@/models/comment.model";
 import Blog from "@/models/blog.model";
 import Notification from "@/models/notification.model";
 
-const queries = {
-  a: () => {
-    return "Hello World";
-  },
-};
+const queries = {};
 
 const mutations = {
   addComment: async (_: any, { input }: AddComment, ctx: Context) => {

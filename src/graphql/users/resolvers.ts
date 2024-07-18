@@ -4,6 +4,7 @@ import User from "@/models/user.model";
 import ApolloError from "@/utils/ApolloError";
 import { removeFromCloudinary, uploadCloudinary } from "@/utils/cloudinary";
 import { Context, verifyUser } from "@/utils/context";
+import { rateLimitedResolver } from "@/utils/rate-limiter";
 import {
   extractFields,
   isBase64Image,
@@ -18,10 +19,12 @@ import {
 } from "./interfaces";
 
 const queries = {
-  getMyProfile: async (_: any, args: any, ctx: Context, info: any) => {
-    const user = await verifyUser(ctx);
-    return user;
-  },
+  getMyProfile: rateLimitedResolver(
+    async (_: any, args: any, ctx: Context, info: any) => {
+      const user = await verifyUser(ctx);
+      return user;
+    }
+  ),
   searchUsers: async (_: any, { input }: SearchUsers) => {
     const { query = "", limit = 20 } = input;
     try {

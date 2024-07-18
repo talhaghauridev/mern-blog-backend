@@ -34,4 +34,8 @@ export const ErrorTypes = {
     errorCode: "UNAUTHORIZED",
     errorStatus: 403,
   },
+  TOO_MANY_REQUESTS: {
+    errorCode: "TOO_MANY_REQUESTS",
+    errorStatus: 429,
+  },
 };

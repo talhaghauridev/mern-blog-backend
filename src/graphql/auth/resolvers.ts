@@ -193,7 +193,7 @@ const mutations = {
 
     if (incomingRefreshToken !== user.refreshToken) {
       return ApolloError(
-        "Refresh token is expired or used",
+        "Refresh token is Invalid",
         ErrorTypes.UNAUTHENTICATED
       );
     }

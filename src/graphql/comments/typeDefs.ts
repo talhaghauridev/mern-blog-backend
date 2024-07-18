@@ -1,10 +1,6 @@
 import { gql } from "apollo-server-express";
 
 const typeDefs = gql`
-  type Query {
-    a: String
-  }
-
   type Comment {
     _id: ID!
     blog_id: Blog!
@@ -30,15 +26,15 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    addComment:(input:AddCommentInput!):AddCommentResponse!
+    addComment(input: AddCommentInput!): AddCommentResponse!
   }
 
   input AddCommentInput {
-    blog_id:String!
-    comment:String!
-    blog_author:String!
-    replying_to:String!
-    notification_id:String
+    blog_id: String!
+    comment: String!
+    blog_author: String!
+    replying_to: String!
+    notification_id: String
   }
 `;
 
